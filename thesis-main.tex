@@ -105,13 +105,13 @@ Nasce, quindi, l'esigenza di algoritmi che raccolgano ed interpretino i dati mis
 
 \section{Il filtro di Kalman}
 
-Il filtro di Kalman~\cite{10.1115/1.3662552} è uno stimatore lineare ricorsivo che minimizza l'errore quadratico medio. \\
+Il filtro di Kalman~\cite{10.1115/1.3662552}~\cite{WelchB95}~\cite{10.1145/3363294} è uno stimatore lineare ricorsivo che minimizza l'errore quadratico medio. \\
 L'aspetto ricorsivo si rifà al fatto che ogni stima $\hat{x}_k$ è determinata in base alla stima precedente $\hat{x}_{k-1}$ e alla misurazione attuale $z_k$, senza richiedere l'utilizzo esplicito di $\hat{x}_0,\hat{x}_1,...,\hat{x}_{k-2}$ o $z_0,...,z_{k-1}$. Si tratta di uno dei principali vantaggi del filtro, in quanto riduce sia la complessità temporale che quella spaziale, senza compromettere l'ottimalità. \\
 Come anticipato, l'ottimalità è definita dal fatto che, ad ogni passo $k$, l'algoritmo produce la stima $\hat{x}_k$ che minimizza la quantità $\mathbb{E}[\lVert e_k\rVert^2]$, con $e_k=\hat{x}_k-x_k$. \\
 
-\subsection{Definizione del problema lineare}
+\section{Definizione del problema lineare}
 
-Il filtro di Kalman può essere applicato a sistemi dinamici che siano rappresentabili con un modello ricorsivo lineare:
+Il filtro di Kalman a tempo discreto può essere applicato a sistemi dinamici che siano rappresentabili con un modello ricorsivo lineare:
 \begin{equation}
 x_k=A_kx_{k-1}+B_ku_{k-1}+w_{k-1}
 \end{equation}
@@ -124,23 +124,28 @@ z_k=H_kx_k+v_k
 dove $H_k$ è la matrice $m\times n$ che determina le variabili osservate in base allo stato che si vuole stimare e $v_k\in\mathbb{R}^m$ è il \textit{measurement noise}.
 \pagebreak
 
-Sono posti dei vincoli di non correlazione fra le variabili aleatorie:
-\begin{gather*}
-\mathrm{Cov}(w_k,u_j)=0_{n\times l},\quad\forall\,k,\forall\,0\leq j<k \\
-\mathrm{Cov}(w_k,w_j)=0_{n\times n},\quad\forall\,k,\forall\,0\leq j<k \\
-\mathrm{Cov}(w_k,v_j)=0_{n\times m},\quad\forall\,k,\forall\,1\leq j\leq k \\
-\mathrm{Cov}(w_k,x_0)=0_{n\times n},\quad\forall\,k
-\end{gather*}
+Sono posti vincoli di non correlazione sulle variabili aleatorie:
+\begin{align*}
+& \mathrm{Cov}(w_k,v_j)=0_{n\times m}, && \forall\,k,\forall\,j \\
+& \mathrm{Cov}(w_k,u_j)=0_{n\times l}, && \forall\,k,\forall\,0\leq j\leq k-1 \\
+& \mathrm{Cov}(v_k,u_j)=0_{m\times l}, && \forall\,k,\forall\,0\leq j\leq k-2 \\
+& \mathrm{Cov}(w_k,w_j)=0_{n\times n}, && \forall\,k,\forall\,j\neq k \\
+& \mathrm{Cov}(v_k,v_j)=0_{m\times m}, && \forall\,k,\forall\,j\neq k \\
+& \mathrm{Cov}(w_k,x_0)=0_{n\times n}, && \forall\,k \\
+& \mathrm{Cov}(v_k,x_0)=0_{m\times n}, && \forall\,k
+\end{align*}
 
 Infine, nelle formulazioni standard del filtro, si richiede che $w$ e $v$ siano privi di \textit{bias}, ossia che $\mathbb{E}[w_k]=\underline{0}$ e $\mathbb{E}[v_k]=\underline{0}$, ad ogni passo $k$.
 
-\subsection{Costruzione del filtro lineare}
+\section{Costruzione del filtro lineare}
+
+Nella letteratura sono riportate diverse derivazioni e dimostrazioni di ottimalità del filtro di Kalman~\cite[pp.~107-113]{10.5555/2823801}~\cite{10.48550/arXiv.1910.03558}. Si presenta qui una costruzione algebrica il più elementare possibile. \\
 
 Il primo passo è descrivere l'espressione che calcoli la stima $\hat{x}_k$. Al passo $k\geq 1$ sono disponibili le informazioni riguardo $\hat{x}_{k-1}$, $u_{k-1}$ e $z_k$, per cui l'espressione lineare avrà la forma generica:
 \begin{equation*}
 \hat{x}_k=\mathcal{A}_k\hat{x}_{k-1}+\mathcal{B}_ku_{k-1}+\mathcal{K}_kz_k
 \end{equation*}
-Per quanto riguarda il passo $k=0$, la scelta della stima iniziale $\hat{x}_0$ è libera, purché sia deterministica. Se si hanno informazioni sulla distribuzione di $x_0$, è consigliabile scegliere $\hat{x}_0=\mathbb{E}[x_0]$, o una sua stima. \\
+Per quanto riguarda il passo $k=0$, la scelta della stima iniziale $\hat{x}_0$ è libera, purché sia deterministica. Se si hanno informazioni sulla distribuzione di $x_0$, è consigliabile scegliere $\hat{x}_0=\mathbb{E}[x_0]$. \\
 
 Una condizione implicita sul filtro richiede che anche l'errore sulle stime generate $e_k$ sia privo di \textit{bias}, ossia, ad ogni passo $k$:
 $$\mathbb{E}[e_k]=\mathbb{E}[\hat{x}_k-x_k]=\underline{0}$$
@@ -177,9 +182,10 @@ Non potendo fare assunzioni su $x$ e $u$, ne segue che:
 $$\mathcal{K}_kH_kA_k-A_k+\mathcal{A}_k=\underline{0}\enspace,\quad\mathcal{K}_kH_kB_k-B_k+\mathcal{B}_k=\underline{0}$$
 $$\Rightarrow\mathcal{A}_k=(I-\mathcal{K}_kH_k)A_k\enspace,\quad\mathcal{B}_k=(I-\mathcal{K}_kH_k)B_k$$
 
-Risulta pratico definire la seguente quantità come una stima \textit{a priori}, ossia che non tiene conto della misurazione al passo $k\geq 1$:
+Risulta pratico definire la seguente quantità, per $k\geq 1$, come una stima \textit{a priori}, ossia che non tenga conto della misurazione $z_k$:
 $$\hat{x}_k^-=A_k\hat{x}_{k-1}+B_ku_{k-1}$$
-L'espressione per ricavare $\hat{x}_k$, ossia la stima \textit{a posteriori}, diventa, perciò:
+Così facendo, si vanno a distinguere due fasi all'interno di ogni passo: una fase di predizione, o \textit{time update}, in cui si calcola $\hat{x}_k^-$ in base alle conoscenze sul modello, e una fase di correzione, o \textit{measurement update}, in cui si combina $\hat{x}_k^-$ con la misurazione $z_k$ per ottenere una stima ottimale $\hat{x}_k$. \\
+L'espressione per ricavare $\hat{x}_k$, ossia la stima \textit{a posteriori}, diventa ora:
 $$\hat{x}_k=(I-\mathcal{K}_kH_k)A_k\hat{x}_{k-1}+(I-\mathcal{K}_kH_k)B_ku_{k-1}+\mathcal{K}_kz_k=$$
 $$=(I-\mathcal{K}_kH_k)(A_k\hat{x}_{k-1}+B_ku_{k-1})+\mathcal{K}_kz_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kz_k=$$
 $$=\hat{x}_k^-+\mathcal{K}_k(z_k-H_k\hat{x}_k^-)$$
@@ -218,18 +224,137 @@ P_k^-=\mathbb{E}\left[(e_k^--\mathbb{E}[e_k^-])(e_k^--\mathbb{E}[e_k^-])^T\right
 Si osservi che i termini centrali si annullano se $e_{k-1}$ e $w_{k-1}$ sono non correlati. In effetti, analizzando ricorsivamente l'errore $e_{k-1}$, si trova che le uniche variabili aleatorie da cui esso dipende sono $u_0,...,u_{k-2}$, $w_0,...,w_{k-2}$, $v_1,...,v_{k-1}$ e $x_0$, ossia variabili con cui $w_{k-1}$ è non correlato per ipotesi. \\
 Ricordando la definizione di $P_{k-1}$ e definendo $Q_{k-1}$ come la auto-covarianza di $w_{k-1}$, si trova, dunque, l'espressione:
 $$P_k^-=A_kP_{k-1}{A_k}^T+Q_{k-1}$$
-La scelta iniziale di $P_0$ è pressoché libera. Se si hanno informazioni sulla distribuzione di $x_0$, è consigliabile utilizzare una stima della sua auto-covarianza. In ogni caso, è necessario avere $P_0\neq 0_{n\times n}$ e semidefinita positiva.
+La scelta iniziale di $P_0$ è pressoché libera. Se si hanno informazioni sulla distribuzione di $x_0$, è consigliabile utilizzare una stima della sua auto-covarianza. In ogni caso, è necessario avere $P_0\neq 0_{n\times n}$ e semidefinita positiva. \\
 
-I suggest referencing stuff as follows: \cref{fig:random-image} or \Cref{fig:random-image}
+Per trovare un'espressione per $P_k$, si consideri inizialmente:
+\begin{gather*}
+\hat{x}_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kz_k \\
+\Rightarrow e_k=\hat{x}_k-x_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kz_k-x_k
+\end{gather*}
+Sostituendo $z_k$ con la sua definizione:
+\begin{gather*}
+e_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_k(H_kx_k+v_k)-x_k= \\
+=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kH_kx_k+\mathcal{K}_kv_k-x_k= \\
+=(I-\mathcal{K}_kH_k)\hat{x}_k^--(I-\mathcal{K}_kH_k)x_k+\mathcal{K}_kv_k= \\
+=(I-\mathcal{K}_kH_k)(\hat{x}_k^--x_k)+\mathcal{K}_kv_k=(I-\mathcal{K}_kH_k)e_k^-+\mathcal{K}_kv_k
+\end{gather*}
+Dunque, si ha:
+\begin{gather*}
+P_k=\mathbb{E}\left[(e_k-\mathbb{E}[e_k])(e_k-\mathbb{E}[e_k])^T\right]=\mathbb{E}\left[e_k(e_k)^T\right]= \\
+=\mathbb{E}\left[\bigl((I-\mathcal{K}_kH_k)e_k^-+\mathcal{K}_kv_k\bigr)\bigl((I-\mathcal{K}_kH_k)e_k^-+\mathcal{K}_kv_k\bigr)^T\right]= \\
+=\mathbb{E}\left[\bigl((I-\mathcal{K}_kH_k)e_k^-+\mathcal{K}_kv_k\bigr)\bigl((e_k^-)^T(I-\mathcal{K}_kH_k)^T+{v_k}^T{\mathcal{K}_k}^T\bigr)\right]= \\
+\begin{multlined}[\textwidth]
+=(I-\mathcal{K}_kH_k)\mathbb{E}\left[e_k^-(e_k^-)^T\right](I-\mathcal{K}_kH_k)^T+(I-\mathcal{K}_kH_k)\mathbb{E}\left[e_k^-(v_k)^T\right]{\mathcal{K}_k}^T+ \\
++\mathcal{K}_k\mathbb{E}\left[v_k(e_k^-)^T\right](I-\mathcal{K}_kH_k)^T+\mathcal{K}_k\mathbb{E}\left[v_k(v_k)^T\right]{\mathcal{K}_k}^T
+\end{multlined}
+\end{gather*}
+Anche in questo caso, l'espressione si riduce alle covarianze. I termini centrali si annullano, poiché le uniche variabili aleatorie ad influenzare $e_k^-$ sono $u_0,...,u_{k-2}$, $w_0,...,w_{k-1}$, $v_1,...,v_{k-1}$ e $x_0$, ossia variabili con cui $v_k$ è non correlato per ipotesi. \\
+Ricordando la definizione di $P_k^-$ e definendo $R_k$ come la auto-covarianza di $v_k$, si trova l'espressione provvisoria:
+$$P_k=(I-\mathcal{K}_kH_k)P_k^-(I-\mathcal{K}_kH_k)^T+\mathcal{K}_kR_k{\mathcal{K}_k}^T$$
+
+Si osservi che minimizzare l'errore quadratico medio $\mathbb{E}[\Vert e_k\Vert^2]$ equivale a minimizzare la traccia di $P_k$. In effetti:
+$$\mathbb{E}[\Vert e_k\Vert^2]=\mathbb{E}[{e_k}^Te_k]=\mathbb{E}[\mathrm{tr}({e_k}^Te_k)]=\mathbb{E}\left[\mathrm{tr}\bigl(e_k(e_k)^T\bigr)\right]=\mathrm{tr}\left(\mathbb{E}\left[e_k(e_k)^T\right]\right)=\mathrm{tr}(P_k)$$
+Dunque, si calcoli:
+\begin{gather*}
+\mathrm{tr}(P_k)=\mathrm{tr}\Bigl((I-\mathcal{K}_kH_k)P_k^-(I-\mathcal{K}_kH_k)^T+\mathcal{K}_kR_k{\mathcal{K}_k}^T\Bigr)= \\
+=\mathrm{tr}\Bigl((I-\mathcal{K}_kH_k)P_k^-\left(I-{H_k}^T{\mathcal{K}_k}^T\right)+\mathcal{K}_kR_k{\mathcal{K}_k}^T\Bigr)= \\
+=\mathrm{tr}\left(P_k^--P_k^-{H_k}^T{\mathcal{K}_k}^T-\mathcal{K}_kH_kP_k^-+\mathcal{K}_kH_kP_k^-{H_k}^T{\mathcal{K}_k}^T+\mathcal{K}_kR_k{\mathcal{K}_k}^T\right)
+\end{gather*}
+Essendo $P_k^-$ simmetrica, vale $P_k^-{H_k}^T{\mathcal{K}_k}^T=(P_k^-)^T{H_k}^T{\mathcal{K}_k}^T=(\mathcal{K}_kH_kP_k^-)^T$, \\
+per cui:
+$$\mathrm{tr}(P_k)=\mathrm{tr}\left(P_k^-\right)-2\,\mathrm{tr}\left(\mathcal{K}_kH_kP_k^-\right)+\mathrm{tr}\left(\mathcal{K}_kH_kP_k^-{H_k}^T{\mathcal{K}_k}^T\right)+\mathrm{tr}\left(\mathcal{K}_kR_k{\mathcal{K}_k}^T\right)$$
+Per ricercare $\mathcal{K}_k$ che minimizzi $\mathrm{tr}(P_k)$ si ponga:
+\begin{gather*}
+\dfrac{\partial\,\mathrm{tr}(P_k)}{\partial\,\mathcal{K}_k}=0_{n\times n} \\
+\begin{multlined}[\textwidth]
+\Rightarrow \dfrac{\partial\,\mathrm{tr}\left(P_k^-\right)}{\partial\,\mathcal{K}_k}-2\,\dfrac{\partial\,\mathrm{tr}\left(\mathcal{K}_kH_kP_k^-\right)}{\partial\,\mathcal{K}_k}+\dfrac{\partial\,\mathrm{tr}\left(\mathcal{K}_kH_kP_k^-{H_k}^T{\mathcal{K}_k}^T\right)}{\partial\,\mathcal{K}_k}+ \\
++\dfrac{\partial\,\mathrm{tr}\left(\mathcal{K}_kR_k{\mathcal{K}_k}^T\right)}{\partial\,\mathcal{K}_k}=0_{n\times n}
+\end{multlined}
+\end{gather*}
+Si osservi che $\mathrm{tr}(P_k^-)$ è costante in $K_k$, per cui il primo termine si annulla. Per calcolare i termini restanti, si utilizzino le seguenti identità, con la seconda valida se $N$ è simmetrica:
+$$\dfrac{\partial\,\mathrm{tr}(MN)}{\partial M}=N^T\enspace,\quad\dfrac{\partial\,\mathrm{tr}(MNM^T)}{\partial M}=2MN$$
+Si ottiene:
+\begin{gather*}
+-2(H_kP_k^-)^T+2\mathcal{K}_k\left(H_kP_k^-{H_k}^T\right)+2\mathcal{K}_kR_k=0_{n\times n} \\
+\Rightarrow-2P_k^-{H_k}^T+2\mathcal{K}_kH_kP_k^-{H_k}^T+2\mathcal{K}_kR_k=0_{n\times n} \\
+\Rightarrow\mathcal{K}_k=P_k^-{H_k}^T\left(H_kP_k^-{H_k}^T+R_k\right)^{-1}
+\end{gather*}
+Esaminando la matrice Hessiana di $\mathrm{tr}(P_k)$, la quale risulta essere semidefinita positiva, si può verificare che il valore trovato rappresenta un minimo globale. \\
+La quantità $\mathcal{K}_k$ è detta matrice dei guadagni di Kalman (\textit{Kalman gain}) e può essere pensata come un indice di affidabilità delle misurazioni rispetto al modello teorico. In effetti, per $R_k\to 0_{m\times m}$ si ha $\mathcal{K}_k\to H^{-1}$, per cui $\hat{x}_k\to z_k$, mentre per $P_k^-\to 0_{n\times n}$ si ha $\mathcal{K}_k\to 0_{n\times m}$, per cui $\hat{x}_k\to \hat{x}_k^-$. \\
+Sostituendo il valore trovato, l'espressione per $P_k$ diventa:
+\begin{gather*}
+P_k=P_k^--P_k^-{H_k}^T{\mathcal{K}_k}^T-\mathcal{K}_kH_kP_k^-+\mathcal{K}_kH_kP_k^-{H_k}^T{\mathcal{K}_k}^T+\mathcal{K}_kR_k{\mathcal{K}_k}^T= \\
+=\left(I-\mathcal{K}_kH_k\right)P_k^--P_k^-{H_k}^T{\mathcal{K}_k}^T+\mathcal{K}_k\left(H_kP_k^-{H_k}^T+R_k\right){\mathcal{K}_k}^T= \\
+\begin{multlined}[\textwidth]
+=\left(I-\mathcal{K}_kH_k\right)P_k^--P_k^-{H_k}^T{\mathcal{K}_k}^T+ \\
++P_k^-{H_k}^T\underbrace{\left(H_kP_k^-{H_k}^T+R_k\right)^{-1}\left(H_kP_k^-{H_k}^T+R_k\right)}_{I}{\mathcal{K}_k}^T=
+\end{multlined} \\
+=\left(I-\mathcal{K}_kH_k\right)P_k^--P_k^-{H_k}^T{\mathcal{K}_k}^T+P_k^-{H_k}^T{\mathcal{K}_k}^T= \\
+=\left(I-\mathcal{K}_kH_k\right)P_k^-
+\end{gather*}
+
+Riassumendo, l'algoritmo si basa sulle seguenti equazioni:
+\begin{gather*}
+\hat{x}_0=\mathbb{E}[x_0] \\
+P_0=\mathrm{Cov}(x_0,x_0) \\[0.2\baselineskip]
+\hline \\[-0.8\baselineskip]
+\hat{x}_k^-=A_k\hat{x}_{k-1}+Bu_{k-1} \\
+P_k^-=A_kP_{k-1}{A_k}^T+Q_{k-1} \\
+\mathcal{K}_k=P_k^-{H_k}^T\left(H_kP_k^-{H_k}^T+R_k\right)^{-1} \\
+\hat{x}_k=\hat{x}_k^-+\mathcal{K}_k(z_k-H_k\hat{x}_k^-) \\
+P_k=\left(I-\mathcal{K}_kH_k\right)P_k^-
+\end{gather*}
+
+\section{Varianti non lineari}
+
+Sulla base della formulazione originale di Kalman, sono state sviluppate numerose varianti del filtro, con l'obiettivo principale di estenderne il campo di applicazione, specie a modelli non lineari. Si presenta qui un elenco delle varianti più conosciute, successivamente schematizzate in \cref{fig:variants-diagram}:
+\begin{itemize}
+\item KF (``Standard'' Kalman Filter)~\cite{10.1115/1.3662552}~\cite{WelchB95}: Semplice ed ottimale per sistemi lineari.
+\item EKF (Extended Kalman Filter)\iffalse~\cite{smith1962}\fi~\cite{WelchB95}: Basato sulla linearizzazione di una funzione di transizione non lineare, con rischio di divergenza.
+\begin{itemize}
+\item EKF2 o SO-EKF (Second-Order Extended Kalman Filter)
+\item MEKF (Multiplicative Extended Kalman Filter)\iffalse~\cite{paulson1969}\fi~\cite{markley2004}: Specifico per la stima dell'assetto (orientamento) espresso come quaternione.
+\end{itemize}
+\item Filtri Sigma-Point: Accurati e robusti in sistemi altamente dinamici, con costo di esecuzione maggiore.
+\begin{itemize}
+\item UKF (Unscented Kalman Filter)~\cite{882463}
+\item QKF (Quadrature Kalman Filter), come il GHKF (Gauss-Hermite Kalman Filter)
+\item CKF (Cubature Kalman Filter)
+\end{itemize}
+\item Metodo Monte Carlo: Basato sull'utilizzo di campioni.
+\begin{itemize}
+\item EnKF (Ensemble Kalman Filter)
+\item PF (Particle Filter): Efficace anche quando i disturbi hanno distribuzione non Gaussiana.
+\end{itemize}
+\end{itemize}
+
+Nell'utilizzo delle varianti EKF e Sigma-Point, spesso si sceglie di memorizzare $P_k$ sotto forma di radice quadrata $\sqrt{P_k}$, per favorire la stabilità numerica dell'algoritmo. Si parla, in questo caso, di SRKF (Square-Root Kalman Filters).
 
 \begin{figure}
     \centering
-    \includegraphics[width=.8\linewidth]{figures/random-image.pdf}
-    \caption{Some random image}
-    \label{fig:random-image}
+    \includegraphics[width=.8\linewidth]{figures/variants-diagram.pdf}
+    \caption{Diagramma di classificazione delle varianti del filtro di Kalman.}
+    \label{fig:variants-diagram}
 \end{figure}
 
-\section{Some cool topic}
+\section{Limitazioni}
+
+Nonostante oggi assuma un ruolo centrale nell'ingegneria aerospaziale e in diversi altri settori, il filtro di Kalman presenta alcune limitazioni intrinseche:
+\begin{itemize}
+\item Per sistemi non lineari con distribuzioni non Gaussiane, non è garantita, in generale, l'ottimalità.
+\item Benché la conoscenza del sistema reale sia la base dell'efficacia del filtro, questa può anche costituire un limite sulla precisione, qualora modelli sufficientemente accurati non siano disponibili.
+\end{itemize}
+
+% I suggest referencing stuff as follows: \cref{fig:random-image} or \Cref{fig:random-image}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=.8\linewidth]{figures/random-image.pdf}
+%     \caption{Some random image}
+%     \label{fig:random-image}
+% \end{figure}
+
+% \section{Some cool topic}
 
 \chapter{Contribution}
 
@@ -247,7 +372,8 @@ You may also put some code snippet (which is NOT float by default), eg: \cref{ls
 
 % \nocite{*} % Remove this as soon as you have the first citation
 
-\bibliographystyle{alpha}
+% \bibliographystyle{alpha}
+\bibliographystyle{ieeetr}
 \bibliography{bibliography}
 
 \begin{acknowledgements} % this is optional
