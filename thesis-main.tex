@@ -14,7 +14,7 @@
 in Ingegneria e Scienze Informatiche}
 \title{
 %Fancy Title
-Navigazione e Guida Autonoma di Veicoli Aerospaziali: Filtro di Kalman e sue varianti
+Studio e applicazione del filtro di Kalman e sue varianti per il tracciamento di oggetti
 }
 \author{
 %Candidate Name
@@ -68,7 +68,7 @@ Optional. Max a few lines.
 \mainmatter
 
 %----------------------------------------------------------------------------------------
-\chapter{Introduction}
+\chapter{Introduzione}
 \label{chap:introduction}
 %----------------------------------------------------------------------------------------
 
@@ -92,39 +92,56 @@ you may need both \ac{vm} and \acp{vm}.
 
 \note{At the end, describe the structure of the paper}
 
-\chapter{State of the art}
+\chapter{Fondamenti teorici}
+
+In questo capitolo si definiscono i concetti di base su cui si svilupperanno gli argomenti di questa tesi, insieme ai modelli matematici che li descrivono. Si presenta, inoltre, una costruzione algebrica del filtro di Kalman e si offre una panoramica delle sue varianti.
 
 \section{I sistemi dinamici}
 
-Un sistema dinamico è un qualunque sistema in cui sia individuabile uno stato che evolve come funzione del tempo: $x=f(t)$. \\
-Per gli scopi di questa tesi, lo stato verrà rappresentato come un vettore $x\in\mathbb{R}^n$, che raccoglie le variabili di stato (es.: posizione, velocità...), e il tempo verrà considerato come una quantità continua $t\in\mathbb{R}$, eventualmente campionata in determinati istanti $t_k$.
+Un sistema dinamico è un qualunque sistema che evolve nel tempo secondo una determinata legge. \\
 
-Modellizzare la realtà a livello macroscopico comporta spesso che $f$ sia non deterministica, per via di fenomeni microscopici. Questo introduce la necessità di effettuare misurazioni periodiche (\textit{measurement}, $z\in\mathbb{R}^m$) per monitorare la reale evoluzione dello stato in presenza di disturbi (\textit{process noise}, $w\in\mathbb{R}^n$). \\
-Sfortunatamente, le misurazioni stesse sono soggette ad ulteriori disturbi (\textit{measurement noise}, $v\in\mathbb{R}^m$). \\
-Nasce, quindi, l'esigenza di algoritmi che raccolgano ed interpretino i dati misurati per determinare una stima (\textit{state estimate}, $\hat{x}$) dello stato reale (\textit{ground truth}, $x$). Questi algoritmi sono detti, appunto, stimatori.
+A seconda dell'obiettivo, si individuano le proprietà del sistema che interessa esaminare (es.: posizione e velocità di un oggetto), dette variabili di stato, e le si raccoglie in un vettore, generalmente $x\in\mathbb{R}^n$, andando a definire una cosiddetta rappresentazione in spazio di stato. \\
+Nella forma generale, si considera il tempo come continuo ($t\in\mathbb{R}$), per cui si parla di modelli continui, espressi con equazioni differenziali:
+$$\dfrac{d}{dt}\bigl(x(t)\bigr)=f\bigl(t,x(t)\bigr)$$ \pagebreak
+
+Tuttavia, si può decidere di considerare lo stato soltanto in determinati istanti $t_k$. Ne risultano modelli discreti, su cui si concentrerà questa tesi, i quali possono essere espressi con relazioni di ricorrenza:
+$$x_k=f(k,x_{k-1})$$
+
+In genere si sceglie di esplicitare la presenza di ingressi $u\in\mathbb{R}^l$ nel sistema (\textit{control input}, es.: forza di gravità, propulsione...), assunti deterministici, e di misurazioni $z\in\mathbb{R}^m$ (\textit{measurement}), effettuate sulle variabili osservabili. Dunque il modello viene espresso con le equazioni:
+\begin{gather*}
+x_k=f(k,x_{k-1},u_{k-1}) \\
+z_k=h(k,x_k)
+\end{gather*}
+La prima è detta ``equazione di stato'' e la seconda ``trasformazione di uscita''. \\
+
+Modellizzare la realtà comporta spesso che la legge di evoluzione $f$ del sistema sia non deterministica, per via di approssimazioni o fenomeni trascurati (\textit{process noise}, $w\in\mathbb{R}^n$), da cui l'importanza di effettuare misurazioni periodiche per monitorare la reale evoluzione dello stato.
+
+Poiché le misurazioni stesse sono soggette a disturbi (\textit{measurement noise}, $v\in\mathbb{R}^m$), il modello completo diventa:
+\begin{gather}
+x_k=f_\text{det}(k,x_{k-1},u_{k-1})+w_{k-1} \\
+z_k=h(k,x_k)+v_k
+\end{gather}
+
+Un caso particolare riguarda i modelli lineari, cioè esprimibili nella seguente forma matriciale:
+\begin{gather}
+x_k=A_kx_{k-1}+B_ku_{k-1}+w_{k-1} \label{eq:transition}\\
+z_k=H_kx_k+v_k \label{eq:output}
+\end{gather}
+In questo caso, $A_k\in\mathbb{R}^{n\times n}$ è detta ``matrice dinamica'' e determina l'evoluzione dello stato dal passo $k-1$ al passo $k$ in assenza di ingressi e disturbi, $B_k\in\mathbb{R}^{l\times n}$ è detta ``matrice di ingresso'' e determina il contributo degli ingressi che agiscono dal passo $k-1$ al passo $k$ e $H_k\in\mathbb{R}^{m\times n}$ è detta ``matrice di uscita'' e determina le variabili osservate in base alle variabili da stimare. \\
+
+In generale, i modelli sono tempo-varianti (o non stazionari), da cui $k$ al pedice di $A_k$, $B_k$ e $H_k$, ma si evidenziano i modelli LTI, ossia lineari tempo-invarianti (o lineari stazionari) in cui le matrici $A$, $B$ e $H$ sono costanti nel tempo. \\
+
+Dalla combinazione delle imprecisioni nel modello e nelle misurazioni, nasce la necessità di algoritmi che raccolgano ed interpretino i dati osservati per determinare una stima (\textit{state estimate}, $\hat{x}$) dello stato reale (\textit{ground truth}, $x$). Questi algoritmi sono detti, appunto, stimatori.
 
 \section{Il filtro di Kalman}
 
 Il filtro di Kalman~\cite{10.1115/1.3662552}~\cite{WelchB95}~\cite{10.1145/3363294} è uno stimatore lineare ricorsivo che minimizza l'errore quadratico medio. \\
-L'aspetto ricorsivo si rifà al fatto che ogni stima $\hat{x}_k$ è determinata in base alla stima precedente $\hat{x}_{k-1}$ e alla misurazione attuale $z_k$, senza richiedere l'utilizzo esplicito di $\hat{x}_0,\hat{x}_1,...,\hat{x}_{k-2}$ o $z_0,...,z_{k-1}$. Si tratta di uno dei principali vantaggi del filtro, in quanto riduce sia la complessità temporale che quella spaziale, senza compromettere l'ottimalità. \\
+L'aspetto ricorsivo implica, innanzitutto, che si tratta di un filtro a tempo discreto e si rifà al fatto che ogni stima $\hat{x}_k$ è determinata in base alla stima precedente $\hat{x}_{k-1}$ e alla misurazione attuale $z_k$, senza richiedere l'utilizzo esplicito di $\hat{x}_0,\hat{x}_1,...,\hat{x}_{k-2}$ o $z_0,...,z_{k-1}$. Si tratta di uno dei principali vantaggi del filtro, in quanto riduce sia la complessità temporale che quella spaziale, senza compromettere l'ottimalità. \\
 Come anticipato, l'ottimalità è definita dal fatto che, ad ogni passo $k$, l'algoritmo produce la stima $\hat{x}_k$ che minimizza la quantità $\mathbb{E}[\lVert e_k\rVert^2]$, con $e_k=\hat{x}_k-x_k$. \\
 
-\section{Definizione del problema lineare}
+Il filtro è applicabile a un qualsiasi modello lineare a tempo discreto, anche tempo-variante, ossia descritto dalle equazioni \ref{eq:transition} e \ref{eq:output}.
 
-Il filtro di Kalman a tempo discreto può essere applicato a sistemi dinamici che siano rappresentabili con un modello ricorsivo lineare:
-\begin{equation}
-x_k=A_kx_{k-1}+B_ku_{k-1}+w_{k-1}
-\end{equation}
-dove $A_k$ è la matrice $n\times n$ di evoluzione dello stato dal passo $k-1$ al passo $k$ in assenza di disturbi e ``azioni di controllo'', $B_k$ è la matrice $l\times n$ di contributo delle ``azioni di controllo'' (\textit{control input}, es.: forza di gravità, propulsione...) $u_{k-1}\in\mathbb{R}^l$ che agiscono dal passo $k-1$ al passo $k$ e $w_{k-1}\in\mathbb{R}^n$ è il \textit{process noise} che agisce dal passo $k-1$ al passo $k$. \\
-
-In aggiunta, è richiesto che le misurazioni siano lineari rispetto allo stato:
-\begin{equation}
-z_k=H_kx_k+v_k
-\end{equation}
-dove $H_k$ è la matrice $m\times n$ che determina le variabili osservate in base allo stato che si vuole stimare e $v_k\in\mathbb{R}^m$ è il \textit{measurement noise}.
-\pagebreak
-
-Sono posti vincoli di non correlazione sulle variabili aleatorie:
+Sono, però, posti vincoli di non correlazione sulle variabili aleatorie:
 \begin{align*}
 & \mathrm{Cov}(w_k,v_j)=0_{n\times m}, && \forall\,k,\forall\,j \\
 & \mathrm{Cov}(w_k,u_j)=0_{n\times l}, && \forall\,k,\forall\,0\leq j\leq k-1 \\
@@ -142,18 +159,18 @@ Infine, nelle formulazioni standard del filtro, si richiede che $w$ e $v$ siano 
 Nella letteratura sono riportate diverse derivazioni e dimostrazioni di ottimalità del filtro di Kalman~\cite[pp.~107-113]{10.5555/2823801}~\cite{10.48550/arXiv.1910.03558}. Si presenta qui una costruzione algebrica il più elementare possibile. \\
 
 Il primo passo è descrivere l'espressione che calcoli la stima $\hat{x}_k$. Al passo $k\geq 1$ sono disponibili le informazioni riguardo $\hat{x}_{k-1}$, $u_{k-1}$ e $z_k$, per cui l'espressione lineare avrà la forma generica:
-\begin{equation*}
+\begin{equation} \label{eq:generic-estimate}
 \hat{x}_k=\mathcal{A}_k\hat{x}_{k-1}+\mathcal{B}_ku_{k-1}+\mathcal{K}_kz_k
-\end{equation*}
+\end{equation}
 Per quanto riguarda il passo $k=0$, la scelta della stima iniziale $\hat{x}_0$ è libera, purché sia deterministica. Se si hanno informazioni sulla distribuzione di $x_0$, è consigliabile scegliere $\hat{x}_0=\mathbb{E}[x_0]$. \\
 
 Una condizione implicita sul filtro richiede che anche l'errore sulle stime generate $e_k$ sia privo di \textit{bias}, ossia, ad ogni passo $k$:
 $$\mathbb{E}[e_k]=\mathbb{E}[\hat{x}_k-x_k]=\underline{0}$$
-Da questa condizione si otterranno informazioni sulle matrici incognite $\mathcal{A}$, $\mathcal{B}$ e $\mathcal{K}$. In effetti, considerando per $k\geq 1$ e sostituendo $\hat{x}_k$ con la sua definizione, si ottiene:
+Da questa condizione si otterranno informazioni sulle matrici incognite $\mathcal{A}$, $\mathcal{B}$ e $\mathcal{K}$. In effetti, considerando per $k\geq 1$ e sostituendo $\hat{x}_k$ con la sua definizione (\ref{eq:generic-estimate}), si ottiene:
 $$\mathbb{E}[\mathcal{A}_k\hat{x}_{k-1}+\mathcal{B}_ku_{k-1}+\mathcal{K}_kz_k-x_k]=\underline{0}$$
-Successivamente, sostituendo $z_k$ con la sua definizione:
+Successivamente, sostituendo $z_k$ con la sua definizione (\ref{eq:output}):
 $$\mathbb{E}\left[\mathcal{A}_k\hat{x}_{k-1}+\mathcal{B}_ku_{k-1}+\mathcal{K}_k\bigl(H_kx_k+v_k\bigr)-x_k\right]=\underline{0}$$
-Sostituendo $x_k$ con la sua relazione ricorsiva e manipolando i termini:
+Sostituendo $x_k$ con la relazione di ricorrenza (\ref{eq:transition}) e manipolando i termini:
 \begin{gather*}
 \begin{multlined}[\textwidth]
 \mathbb{E}\Bigl[\mathcal{A}_k\hat{x}_{k-1}+\mathcal{B}_ku_{k-1}+\mathcal{K}_k\Bigl(H_k\bigl(A_kx_{k-1}+B_ku_{k-1}+w_{k-1}\bigr)+v_k\Bigr)+ \\
@@ -179,7 +196,7 @@ Sostituendo $x_k$ con la sua relazione ricorsiva e manipolando i termini:
 Sfruttando l'ipotesi che le quantità $\hat{x}_{k-1}-x_{k-1}$, $w_{k-1}$ e $v_k$ siano prive di \textit{bias}:
 $$\bigl(\mathcal{K}_kH_kA_k-A_k+\mathcal{A}_k\bigr)\mathbb{E}[x_{k-1}]+\bigl(\mathcal{K}_kH_kB_k-B_k+\mathcal{B}_k\bigr)\mathbb{E}[u_{k-1}]=\underline{0}$$
 Non potendo fare assunzioni su $x$ e $u$, ne segue che:
-$$\mathcal{K}_kH_kA_k-A_k+\mathcal{A}_k=\underline{0}\enspace,\quad\mathcal{K}_kH_kB_k-B_k+\mathcal{B}_k=\underline{0}$$
+$$\mathcal{K}_kH_kA_k-A_k+\mathcal{A}_k=0_{n\times n}\enspace,\quad\mathcal{K}_kH_kB_k-B_k+\mathcal{B}_k=0_{l\times n}$$
 $$\Rightarrow\mathcal{A}_k=(I-\mathcal{K}_kH_k)A_k\enspace,\quad\mathcal{B}_k=(I-\mathcal{K}_kH_k)B_k$$
 
 Risulta pratico definire la seguente quantità, per $k\geq 1$, come una stima \textit{a priori}, ossia che non tenga conto della misurazione $z_k$:
@@ -231,7 +248,7 @@ Per trovare un'espressione per $P_k$, si consideri inizialmente:
 \hat{x}_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kz_k \\
 \Rightarrow e_k=\hat{x}_k-x_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kz_k-x_k
 \end{gather*}
-Sostituendo $z_k$ con la sua definizione:
+Sostituendo $z_k$ con la sua definizione (\ref{eq:output}):
 \begin{gather*}
 e_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_k(H_kx_k+v_k)-x_k= \\
 =(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kH_kx_k+\mathcal{K}_kv_k-x_k= \\
@@ -281,6 +298,7 @@ Si ottiene:
 \end{gather*}
 Esaminando la matrice Hessiana di $\mathrm{tr}(P_k)$, la quale risulta essere semidefinita positiva, si può verificare che il valore trovato rappresenta un minimo globale. \\
 La quantità $\mathcal{K}_k$ è detta matrice dei guadagni di Kalman (\textit{Kalman gain}) e può essere pensata come un indice di affidabilità delle misurazioni rispetto al modello teorico. In effetti, per $R_k\to 0_{m\times m}$ si ha $\mathcal{K}_k\to H^{-1}$, per cui $\hat{x}_k\to z_k$, mentre per $P_k^-\to 0_{n\times n}$ si ha $\mathcal{K}_k\to 0_{n\times m}$, per cui $\hat{x}_k\to \hat{x}_k^-$. \\
+
 Sostituendo il valore trovato, l'espressione per $P_k$ diventa:
 \begin{gather*}
 P_k=P_k^--P_k^-{H_k}^T{\mathcal{K}_k}^T-\mathcal{K}_kH_kP_k^-+\mathcal{K}_kH_kP_k^-{H_k}^T{\mathcal{K}_k}^T+\mathcal{K}_kR_k{\mathcal{K}_k}^T= \\
@@ -307,12 +325,12 @@ P_k=\left(I-\mathcal{K}_kH_k\right)P_k^-
 
 \section{Varianti non lineari}
 
-Sulla base della formulazione originale di Kalman, sono state sviluppate numerose varianti del filtro, con l'obiettivo principale di estenderne il campo di applicazione, specie a modelli non lineari. Si presenta qui un elenco delle varianti più conosciute, successivamente schematizzate in \cref{fig:variants-diagram}:
+Sulla base della formulazione originale di Kálmán, sono state sviluppate numerose varianti del filtro, con l'obiettivo principale di estenderne il campo di applicazione, specie a modelli non lineari. Si presenta qui un elenco delle varianti più conosciute, successivamente schematizzate in \cref{fig:variants-diagram}:
 \begin{itemize}
 \item KF (``Standard'' Kalman Filter)~\cite{10.1115/1.3662552}~\cite{WelchB95}: Semplice ed ottimale per sistemi lineari.
 \item EKF (Extended Kalman Filter)\iffalse~\cite{smith1962}\fi~\cite{WelchB95}: Basato sulla linearizzazione di una funzione di transizione non lineare, con rischio di divergenza.
 \begin{itemize}
-\item EKF2 o SO-EKF (Second-Order Extended Kalman Filter)
+\item EKF2 o SO-EKF (Second-Order Extended Kalman Filter)~\cite[pp.~191-192]{10.5555/2823801}
 \item MEKF (Multiplicative Extended Kalman Filter)\iffalse~\cite{paulson1969}\fi~\cite{markley2004}: Specifico per la stima dell'assetto (orientamento) espresso come quaternione.
 \end{itemize}
 \item Filtri Sigma-Point: Accurati e robusti in sistemi altamente dinamici, con costo di esecuzione maggiore.
@@ -328,18 +346,19 @@ Sulla base della formulazione originale di Kalman, sono state sviluppate numeros
 \end{itemize}
 \end{itemize}
 
-Nell'utilizzo delle varianti EKF e Sigma-Point, spesso si sceglie di memorizzare $P_k$ sotto forma di radice quadrata $\sqrt{P_k}$, per favorire la stabilità numerica dell'algoritmo. Si parla, in questo caso, di SRKF (Square-Root Kalman Filters).
+Nell'utilizzo delle varianti EKF e Sigma-Point, spesso si sceglie di memorizzare $P_k$ fattorizzata sotto forma di radice quadrata $\sqrt{P_k}$, per favorire la stabilità numerica dell'algoritmo. Si parla, in questo caso, di SRKF (Square-Root Kalman Filters). \pagebreak
 
 \begin{figure}
     \centering
-    \includegraphics[width=.8\linewidth]{figures/variants-diagram.pdf}
+    \includegraphics[width=.7\linewidth]{figures/variants-diagram.pdf}
     \caption{Diagramma di classificazione delle varianti del filtro di Kalman.}
     \label{fig:variants-diagram}
+    \vspace{2\baselineskip}
 \end{figure}
 
 \section{Limitazioni}
 
-Nonostante oggi assuma un ruolo centrale nell'ingegneria aerospaziale e in diversi altri settori, il filtro di Kalman presenta alcune limitazioni intrinseche:
+Sebbene oggi assuma un ruolo fondamentale nell'ingegneria aerospaziale e in diversi altri settori, il filtro di Kalman presenta alcune limitazioni intrinseche:
 \begin{itemize}
 \item Per sistemi non lineari con distribuzioni non Gaussiane, non è garantita, in generale, l'ottimalità.
 \item Benché la conoscenza del sistema reale sia la base dell'efficacia del filtro, questa può anche costituire un limite sulla precisione, qualora modelli sufficientemente accurati non siano disponibili.
@@ -355,6 +374,24 @@ Nonostante oggi assuma un ruolo centrale nell'ingegneria aerospaziale e in diver
 % \end{figure}
 
 % \section{Some cool topic}
+
+\chapter{Evoluzione e sviluppi recenti}
+
+Lo studio del filtro di Kalman resta un settore vivo, a più di 60 anni dalla sua concezione. Si continuano a identificare nuovi settori di applicazione, nuove tecniche di miglioramento dell'accuratezza, della stabilità numerica e della performance computazionale. Nuove varianti, sia generiche che specializzate, si aggiungono a quelle già consolidate. In questo capitolo si presenta un riassunto della storia ed evoluzione del filtro, insieme alle missioni che ne hanno dimostrato il merito, e si riportano alcuni dei progressi più recenti, fornendo un'anteprima della direzione attuale della ricerca.
+
+\section{Dalla guerra fredda ad oggi}
+
+Rudolf Emil Kálmán studiò i sistemi dinamici lineari a tempo discreto già nel 1954 per la sua tesi di laurea magistrale al MIT. Nel 1958, con l'intensificarsi della corsa allo spazio, il governo federale degli Stati Uniti d'America finanziò gli studi di Kálmán e del collega Richard S. Bucy per la stima e il controllo di sistemi aerospaziali. In questo contesto, a novembre dello stesso anno, nacque l'idea di riformulare il metodo di stima ottimale dell'esistente filtro di Wiener-Kolmogorov, utilizzando una rappresentazione in spazio di stato generica e spostando il problema dal dominio delle frequenze al dominio del tempo. Il filtro ottenuto rimuoveva il requisito di un modello tempo-invariante, richiedeva di esprimere il modello con equazioni più semplici da ricavare e prometteva un algoritmo più adatto all'implementazione a computer.
+Nel 1960, Kálmán pubblicò la descrizione del filtro a tempo discreto~\cite{10.1115/1.3662552} e nel 1961, insieme a Bucy, il filtro a tempo continuo~\cite{10.1115/1.3658902}, chiamato oggi filtro di Kalman-Bucy.
+% TODO: riprendi da Schmidt
+
+\section{Iteratively Saturated Kalman Filtering}
+
+% TODO
+
+\section{AI-Aided Kalman Filters}
+
+% TODO
 
 \chapter{Contribution}
 
