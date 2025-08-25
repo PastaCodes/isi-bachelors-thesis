@@ -14,7 +14,7 @@
 in Ingegneria e Scienze Informatiche}
 \title{
 %Fancy Title
-Studio e applicazione del filtro di Kalman e sue varianti per il tracciamento di oggetti
+Studio e applicazione del filtro di Kalman e sue varianti per il tracciamento di corpi celesti
 }
 \author{
 %Candidate Name
@@ -392,6 +392,76 @@ Nel 1960, Kálmán pubblicò la descrizione del filtro a tempo discreto~\cite{10
 \section{AI-Aided Kalman Filters}
 
 % TODO
+
+\chapter{Modello astronomico}
+
+\section{Coordinate celesti}
+
+Le osservazioni raccolte dal Minor Planet Center fanno uso di una coppia di angoli $(\alpha,\delta)$ per identificare la posizione dei corpi nella sfera celeste, o, più precisamente, per identificare la direzione orientata dall'osservatore verso la posizione apparente del corpo considerato. I due angoli sono definiti con riferimento al piano equatoriale e al punto vernale all'epoca J2000.0 (mezzogiorno del 1° gennaio 2000, calendario gregoriano e tempo terrestre). Nella pratica si considerano assi orientati secondo il sistema ICRS, adottato dalla International Astronomical Union dal 1° gennaio 1998, spostando l'origine dal baricentro del sistema solare alla posizione dell'osservatore (osservazione topocentrica). In questo contesto, l'ascensione retta $\alpha\in[0,2\pi)$ rappresenta la rotazione attorno all'asse z, mentre la declinazione $\delta\in\left[-\frac{\pi}{2},\frac{\pi}{2}\right]$ rappresenta la distanza angolare dal piano xy. Dunque, indicando con $\Delta$ la distanza apparente tra l'osservatore e il corpo al momento dell'osservazione, la posizione apparente del corpo osservato, in coordinate cartesiane topocentriche, è data da:
+\begin{equation}
+\begin{pmatrix} x \\ y \\ z \end{pmatrix}=R_z(\alpha)\,R_y(-\delta)\begin{pmatrix} \Delta \\ 0 \\ 0 \end{pmatrix}=\begin{pmatrix} \Delta\cos(\delta)\cos(\alpha) \\ \Delta\cos(\delta)\sin(\alpha) \\ \Delta\sin(\delta) \end{pmatrix}
+\end{equation}
+La conversione a coordinate baricentriche richiede semplicemente di sommare la posizione dell'osservatore rispetto al baricentro del sistema solare.
+\pagebreak
+
+Si definiscono le distanze apparenti $R$ tra l'osservatore e il Sole al momento dell'osservazione e $r$ tra il corpo osservato e il Sole nel momento in cui la luce osservata viene riflessa sulla superficie del corpo. Si definiscono gli angoli di separazione $\theta\in[0,\pi]$, detta elongazione, tra il corpo e il Sole come appaiono all'osservatore al momento dell'osservazione e $\phi\in[0,\pi]$, detta fase o angolo di fase, tra l'osservatore e il Sole come appaiono dal corpo nel momento in cui la luce osservata viene riflessa. Seppure si tratti di una definizione analoga, l'angolo di fase viene definito, in genere, come l'angolo tra la luce incidente e la luce riflessa verso l'osservatore, per via del suo impatto sul modello ottico descritto nella sezione \ref{sec:photometry}. \\
+
+Si è parlato finora di quantità apparenti. Questa precisazione è necessaria per via della velocità finita della luce e ad altri fenomeni come aberrazioni, rifrazioni ed effetti relativistici. Da questo punto in poi si considerano le quantità apparenti come coincidenti alle controparti ``reali'' (geometriche), con la consapevolezza che ciò introduce imprecisioni nel modello, le quali dovranno essere considerate nell'applicazione del filtro di Kalman. Queste imprecisioni sono accettabili per il tracciamento di asteroidi, ma possono diventare problematiche per oggetti più veloci.
+
+Con questa semplificazione diventa possibile considerare il triangolo tra il corpo osservato, l'osservatore e il Sole e applicare il teorema dei seni per determinare relazioni fra gli angoli e le distanze. In particolare:
+\begin{gather}
+\frac{r}{\sin(\theta)}=\frac{R}{\sin(\alpha)} \\
+\frac{\Delta}{\sin(\pi-\theta-\alpha)}=\frac{R}{\sin(\alpha)}
+\end{gather}
+
+\section{Fotometria e il sistema H-G}\label{sec:photometry}
+
+L'intensità della luce osservata è espressa dalla magnitudine apparente e può essere utilizzata per stimare la distanza del corpo. Intuitivamente, questa quantità dipende dall'angolo di fase ($\phi\approx0$ indica un corpo perfettamente illuminato, mentre $\phi\approx1$ comporta che non venga riflessa luce verso l'osservatore), dalle distanze $r$ e $\Delta$ e da alcune caratteristiche fisiche del corpo. Tuttavia non esiste un modello macroscopico esatto.
+
+Una delle prime applicazioni delle nozioni di fotometria allo studio degli asteroidi ha prodotto il modello H-G~\cite{bowell1989}~\cite{dymock2007}, usato tuttora quando non si dispone di informazioni sufficienti per impiegare modelli più precisi. Gli asteroidi vengono caratterizzati da due parametri: $H$, detta magnitudine assoluta, che equivale alla magnitudine apparente per $r=\Delta=1~\mathrm{AU}$ e $\phi=0$\quad e $G$, detto \textit{slope parameter}, che quantifica un picco di luminosità che spesso si verifica nella curva di fase vicino all'opposizione. Se si esprimono le distanze in unità astronomiche, la magnitudine apparente è descritta da:
+\begin{gather}
+V=H+5\log_{10}(r\Delta)-2.5\log_{10}(\Phi(\phi)) \\
+\Phi(\phi)=(1-G)\exp\left(-3.33\bigl(\tan\left(\tfrac{\phi}{2}\right)\bigr)^{0.63}\right)+G\exp\left(-1.87\bigl(\tan\left(\tfrac{\phi}{2}\right)\bigr)^{1.22}\right)
+\end{gather}
+
+\section{Orbite ellittiche}
+
+Il moto dei pianeti, degli asteroidi e delle comete è ben approssimato da orbite ellittiche, con un fuoco occupato dal baricentro del sistema solare. Tali orbite possono essere caratterizzate tramite i parametri orbitali kepleriani:
+\begin{itemize}
+\item il semiasse maggiore $a$;
+\item l'eccentricità $e$, dove $e=0$ indica un orbita circolare, mentre $e\to 1$ descrive un'orbita progressivamente più schiacciata;
+\item l'inclinazione $i\in[0,\pi]$ del piano dell'orbita, in genere espressa rispetto al piano dell'orbita della Terra, ma in questo caso espressa rispetto al piano xy del sistema di riferimento, con $i<\frac{\pi}{2}$ indicante un'orbita prograda e $i>\frac{\pi}{2}$ indicante un'orbita retrograda;
+\item la longitudine del nodo ascendente $\Omega$;
+\item l'argomento del periapside $\omega$.
+\end{itemize}
+La posizione del corpo nell'orbita è identificata dall'anomalia. Più precisamente, la distanza angolare dal periapside è detta anomalia vera e indicata con $\nu$. \\
+Si definisce l'argomento di latitudine $u=\omega+\nu$, così che le coordinate cartesiane del corpo siano date da:
+\begin{equation}
+\begin{pmatrix}x \\ y \\ z\end{pmatrix}=R_z(\Omega)R_x(i)R_z(u)\begin{pmatrix}r \\ 0 \\ 0\end{pmatrix}=\begin{pmatrix}r\bigl(\cos(\Omega)\cos(u)-\sin(\Omega)\sin(u)\cos(i)\bigr) \\ r\bigl(\sin(\Omega)\cos(u)+\cos(\Omega)\sin(u)\cos(i)\bigr) \\ r\sin(u)\sin(i)\end{pmatrix}
+\end{equation}
+Per studiare l'evoluzione della posizione nel tempo si introducono i concetti di anomalia media $M$ e anomalia eccentrica $E$. \\
+La prima avanza linearmente nel tempo in base al moto medio $n$ e al tempo di periapside $\tau$:
+\begin{equation}
+M=n(t-\tau)
+\end{equation}
+Il moto medio è definito dal periodo dell'orbita come $n=\frac{2\pi}{T}$ ed è ricavabile dal semiasse maggiore e dal parametro gravitazionale $\mu=GM$ del corpo primario (in questo caso $G$ è la costante di gravitazione universale e $M$ è la massa del corpo primario):
+\begin{equation}
+n=\sqrt{\frac{\mu}{a^3}}
+\end{equation}
+Determinata l'anomalia media, si risale all'anomalia eccentrica esprimendo gli angoli in radianti e risolvendo l'equazione di Keplero tramite metodi numerici:
+\begin{equation}
+M=E-e\sin(E)
+\end{equation}
+In questo caso si è scelto di utilizzare il metodo di Newton, ponendo $f(x)=x-e\sin(x)-M$, $f^\prime(x)=1-e\cos(x)$ e $x_0=M$. \\
+Dall'anomalia eccentrica è possibile passare all'anomalia vera. Una formula numericamente stabile richiede di calcolare il valore intermedio $\beta$:
+\begin{gather}
+\beta=\frac{e}{1+\sqrt{1-e^2}} \\
+\nu=E+2\arctan\left(\frac{\beta\sin(E)}{1-\beta\cos(E)}\right)
+\end{gather}
+Infine, la distanza radiale dal fuoco occupato è legata all'anomalia eccentrica da:
+\begin{equation}
+r=a(1-e\cos(E))
+\end{equation}
 
 \chapter{Contribution}
 
