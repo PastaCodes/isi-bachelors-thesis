@@ -107,7 +107,7 @@ $$\dfrac{d}{dt}\bigl(x(t)\bigr)=f\bigl(t,x(t)\bigr)$$ \pagebreak
 Tuttavia, si può decidere di considerare lo stato soltanto in determinati istanti $t_k$. Ne risultano modelli discreti, su cui si concentrerà questa tesi, i quali possono essere espressi con relazioni di ricorrenza:
 $$x_k=f(k,x_{k-1})$$
 
-In genere si sceglie di esplicitare la presenza di ingressi $u\in\mathbb{R}^l$ nel sistema (\textit{control input}, es.: forza di gravità, propulsione...), assunti deterministici, e di misurazioni $z\in\mathbb{R}^m$ (\textit{measurement}), effettuate sulle variabili osservabili. Dunque il modello viene espresso con le equazioni:
+In genere si sceglie di esplicitare la presenza di ingressi $u\in\mathbb{R}^l$ nel sistema (\textit{control input}, es.: forza di gravità, propulsione...), assunti deterministici, e di misurazioni $z\in\mathbb{R}^m$ (\textit{measurement}), effettuate sulle variabili osservate. Dunque il modello viene espresso con le equazioni:
 \begin{gather*}
 x_k=f(k,x_{k-1},u_{k-1}) \\
 z_k=h(k,x_k)
@@ -381,7 +381,7 @@ Lo studio del filtro di Kalman resta un settore vivo, a più di 60 anni dalla su
 
 \section{Dalla guerra fredda ad oggi}
 
-Rudolf Emil Kálmán studiò i sistemi dinamici lineari a tempo discreto già nel 1954 per la sua tesi di laurea magistrale al MIT. Nel 1958, con l'intensificarsi della corsa allo spazio, il governo federale degli Stati Uniti d'America finanziò gli studi di Kálmán e del collega Richard S. Bucy per la stima e il controllo di sistemi aerospaziali. In questo contesto, a novembre dello stesso anno, nacque l'idea di riformulare il metodo di stima ottimale dell'esistente filtro di Wiener-Kolmogorov, utilizzando una rappresentazione in spazio di stato generica e spostando il problema dal dominio delle frequenze al dominio del tempo. Il filtro ottenuto rimuoveva il requisito di un modello tempo-invariante, richiedeva di esprimere il modello con equazioni più semplici da ricavare e prometteva un algoritmo più adatto all'implementazione a computer.
+Rudolf Emil Kálmán studiò i sistemi dinamici lineari a tempo discreto già nel 1954 per la sua tesi di laurea magistrale al MIT. Nel 1958, con l'intensificarsi della corsa allo spazio, il governo federale degli Stati Uniti d'America finanziò gli studi di Kálmán e del collega Richard S. Bucy per la stima e il controllo di sistemi aerospaziali. In questo contesto, a novembre dello stesso anno, nacque l'idea di riformulare il metodo di stima ottimale dell'esistente filtro di Wiener-Kolmogorov, utilizzando una rappresentazione in spazio di stato generica e spostando il problema dal dominio delle frequenze al dominio del tempo. Il filtro ottenuto rimuoveva il requisito di un modello tempo-invariante, permetteva di esprimere il modello con equazioni più semplici da ricavare e prometteva un algoritmo più adatto all'implementazione a computer.
 Nel 1960, Kálmán pubblicò la descrizione del filtro a tempo discreto~\cite{10.1115/1.3662552} e nel 1961, insieme a Bucy, il filtro a tempo continuo~\cite{10.1115/1.3658902}, chiamato oggi filtro di Kalman-Bucy.
 % TODO: riprendi da Schmidt
 
@@ -404,23 +404,23 @@ Le osservazioni raccolte dal Minor Planet Center fanno uso di una coppia di ango
 La conversione a coordinate baricentriche richiede semplicemente di sommare la posizione dell'osservatore rispetto al baricentro del sistema solare.
 \pagebreak
 
-Si definiscono le distanze apparenti $R$ tra l'osservatore e il Sole al momento dell'osservazione e $r$ tra il corpo osservato e il Sole nel momento in cui la luce osservata viene riflessa sulla superficie del corpo. Si definiscono gli angoli di separazione $\theta\in[0,\pi]$, detta elongazione, tra il corpo e il Sole come appaiono all'osservatore al momento dell'osservazione e $\phi\in[0,\pi]$, detta fase o angolo di fase, tra l'osservatore e il Sole come appaiono dal corpo nel momento in cui la luce osservata viene riflessa. Seppure si tratti di una definizione analoga, l'angolo di fase viene definito, in genere, come l'angolo tra la luce incidente e la luce riflessa verso l'osservatore, per via del suo impatto sul modello ottico descritto nella sezione \ref{sec:photometry}. \\
+Si definiscono le distanze apparenti $R$ tra l'osservatore e il Sole al momento dell'osservazione e $d$ (solitamente indicata con $r$, ma da non confondersi con la distanza dal fuoco occupato dell'orbita) tra il corpo osservato e il Sole nel momento in cui la luce osservata viene riflessa sulla superficie del corpo. Si definiscono gli angoli di separazione $\theta\in[0,\pi]$, detta elongazione, tra il corpo e il Sole come appaiono all'osservatore al momento dell'osservazione e $\phi\in[0,\pi]$, detto angolo di fase, tra l'osservatore e il Sole come appaiono dal corpo nel momento in cui la luce osservata viene riflessa. Seppure si tratti di una definizione analoga, l'angolo di fase viene definito, in genere, come l'angolo tra la luce incidente e la luce riflessa verso l'osservatore, per via del suo impatto sul modello ottico descritto nella sezione \ref{sec:photometry}. \\
 
-Si è parlato finora di quantità apparenti. Questa precisazione è necessaria per via della velocità finita della luce e ad altri fenomeni come aberrazioni, rifrazioni ed effetti relativistici. Da questo punto in poi si considerano le quantità apparenti come coincidenti alle controparti ``reali'' (geometriche), con la consapevolezza che ciò introduce imprecisioni nel modello, le quali dovranno essere considerate nell'applicazione del filtro di Kalman. Queste imprecisioni sono accettabili per il tracciamento di asteroidi, ma possono diventare problematiche per oggetti più veloci.
+Si è parlato finora di quantità apparenti. Questa precisazione è necessaria per via della velocità finita della luce e ad altri fenomeni come aberrazioni, rifrazioni ed effetti relativistici. Da questo punto in poi si considereranno le quantità apparenti come coincidenti alle controparti ``reali'' (geometriche), con la consapevolezza che ciò introdurrà imprecisioni nel modello, le quali dovranno essere considerate nell'applicazione del filtro di Kalman. Queste imprecisioni sono accettabili per il tracciamento di asteroidi, ma possono diventare problematiche per oggetti più veloci.
 
 Con questa semplificazione diventa possibile considerare il triangolo tra il corpo osservato, l'osservatore e il Sole e applicare il teorema dei seni per determinare relazioni fra gli angoli e le distanze. In particolare:
 \begin{gather}
-\frac{r}{\sin(\theta)}=\frac{R}{\sin(\alpha)} \\
-\frac{\Delta}{\sin(\pi-\theta-\alpha)}=\frac{R}{\sin(\alpha)}
+\frac{d}{\sin(\theta)}=\frac{R}{\sin(\phi)} \\
+\frac{\Delta}{\sin(\pi-\theta-\phi)}=\frac{R}{\sin(\phi)}\Rightarrow\frac{\Delta}{\sin(\theta+\phi)}=\frac{R}{\sin(\phi)}
 \end{gather}
 
 \section{Fotometria e il sistema H-G}\label{sec:photometry}
 
-L'intensità della luce osservata è espressa dalla magnitudine apparente e può essere utilizzata per stimare la distanza del corpo. Intuitivamente, questa quantità dipende dall'angolo di fase ($\phi\approx0$ indica un corpo perfettamente illuminato, mentre $\phi\approx1$ comporta che non venga riflessa luce verso l'osservatore), dalle distanze $r$ e $\Delta$ e da alcune caratteristiche fisiche del corpo. Tuttavia non esiste un modello macroscopico esatto.
+L'intensità della luce osservata è espressa dalla magnitudine apparente e può essere utilizzata per stimare la distanza del corpo. Intuitivamente, questa quantità dipende dall'angolo di fase ($\phi\approx0$ indica un corpo perfettamente illuminato, mentre $\phi\approx1$ comporta che non venga riflessa luce verso l'osservatore), dalle distanze $d$ e $\Delta$ e da alcune caratteristiche fisiche del corpo. Tuttavia non esiste un modello macroscopico esatto.
 
-Una delle prime applicazioni delle nozioni di fotometria allo studio degli asteroidi ha prodotto il modello H-G~\cite{bowell1989}~\cite{dymock2007}, usato tuttora quando non si dispone di informazioni sufficienti per impiegare modelli più precisi. Gli asteroidi vengono caratterizzati da due parametri: $H$, detta magnitudine assoluta, che equivale alla magnitudine apparente per $r=\Delta=1~\mathrm{AU}$ e $\phi=0$\quad e $G$, detto \textit{slope parameter}, che quantifica un picco di luminosità che spesso si verifica nella curva di fase vicino all'opposizione. Se si esprimono le distanze in unità astronomiche, la magnitudine apparente è descritta da:
+Una delle prime applicazioni delle nozioni di fotometria allo studio degli asteroidi ha prodotto il modello H-G~\cite{bowell1989}~\cite{dymock2007}, usato tuttora quando non si dispone di informazioni sufficienti per impiegare modelli più precisi. Gli asteroidi vengono caratterizzati da due parametri: $H$, detta magnitudine assoluta, che equivale alla magnitudine apparente per $d=\Delta=1~\mathrm{AU}$ e $\phi=0$\quad e $G$, detto \textit{slope parameter}, che quantifica un picco di luminosità che spesso si verifica nella curva di fase vicino all'opposizione. Se si esprimono le distanze in unità astronomiche, la magnitudine apparente è descritta da:
 \begin{gather}
-V=H+5\log_{10}(r\Delta)-2.5\log_{10}(\Phi(\phi)) \\
+V=H+5\log_{10}(d\Delta)-2.5\log_{10}(\Phi(\phi)) \\
 \Phi(\phi)=(1-G)\exp\left(-3.33\bigl(\tan\left(\tfrac{\phi}{2}\right)\bigr)^{0.63}\right)+G\exp\left(-1.87\bigl(\tan\left(\tfrac{\phi}{2}\right)\bigr)^{1.22}\right)
 \end{gather}
 
@@ -435,7 +435,7 @@ Il moto dei pianeti, degli asteroidi e delle comete è ben approssimato da orbit
 \item l'argomento del periapside $\omega$.
 \end{itemize}
 La posizione del corpo nell'orbita è identificata dall'anomalia. Più precisamente, la distanza angolare dal periapside è detta anomalia vera e indicata con $\nu$. \\
-Si definisce l'argomento di latitudine $u=\omega+\nu$, così che le coordinate cartesiane del corpo siano date da:
+Si definisce la distanza radiale $r$ dal fuoco occupato e l'argomento di latitudine $u=\omega+\nu$, cosicché le coordinate cartesiane del corpo siano date da:
 \begin{equation}
 \begin{pmatrix}x \\ y \\ z\end{pmatrix}=R_z(\Omega)R_x(i)R_z(u)\begin{pmatrix}r \\ 0 \\ 0\end{pmatrix}=\begin{pmatrix}r\bigl(\cos(\Omega)\cos(u)-\sin(\Omega)\sin(u)\cos(i)\bigr) \\ r\bigl(\sin(\Omega)\cos(u)+\cos(\Omega)\sin(u)\cos(i)\bigr) \\ r\sin(u)\sin(i)\end{pmatrix}
 \end{equation}
@@ -448,7 +448,7 @@ Il moto medio è definito dal periodo dell'orbita come $n=\frac{2\pi}{T}$ ed è 
 \begin{equation}
 n=\sqrt{\frac{\mu}{a^3}}
 \end{equation}
-Determinata l'anomalia media, si risale all'anomalia eccentrica esprimendo gli angoli in radianti e risolvendo l'equazione di Keplero tramite metodi numerici:
+Una volta determinata l'anomalia media, si risale all'anomalia eccentrica esprimendo gli angoli in radianti e risolvendo l'equazione di Keplero tramite metodi numerici:
 \begin{equation}
 M=E-e\sin(E)
 \end{equation}
@@ -458,9 +458,58 @@ Dall'anomalia eccentrica è possibile passare all'anomalia vera. Una formula num
 \beta=\frac{e}{1+\sqrt{1-e^2}} \\
 \nu=E+2\arctan\left(\frac{\beta\sin(E)}{1-\beta\cos(E)}\right)
 \end{gather}
-Infine, la distanza radiale dal fuoco occupato è legata all'anomalia eccentrica da:
+Infine, la distanza radiale è legata all'anomalia eccentrica da:
 \begin{equation}
 r=a(1-e\cos(E))
+\end{equation}
+
+\chapter{Applicazione del filtro}
+
+\section{Sfide sul tracciamento di angoli}
+
+Per via della natura del problema, si vuole memorizzare quantità angolari sia nel vettore di stato che nel vettore di misurazione. Tuttavia, fare ciò senza dovuti accorgimenti introdurrebbe forti discontinuità nelle equazioni che descrivono il sistema. Si noti, ad esempio, che all'avanzare dell'anomalia, questa passa da $\nu\approx2\pi$ a $\nu\approx0$. In aggiunta, una stima $\hat{\nu}\approx2\pi$ affiancata ad una misurazione $\nu\approx0$ è nella realtà da considerarsi valida, ma dal punto di vista del filtro apparirebbe come una grossa discrepanza.
+
+Per affrontare questo problema, si decide di non memorizzare direttamente gli angoli, ma bensì di rappresentarli nelle loro componenti sulla circonferenza unitaria, ossia la coppia $\bigl(cos(\cdot),sin(\cdot)\bigr)$. Questo approccio è analogo alla rappresentazione di rotazioni in tre dimensioni attraverso l'uso di quaternioni e permette di rimuovere le discontinuità di cui si è parlato.
+
+In figura~\ref{fig:angle-method-comparison} si mostra l'efficacia di questa soluzione applicata alla simulazione di un corpo in moto circolare uniforme.
+
+Tuttavia restano delle limitazioni, dovute al fatto che questa trasformazione è pressoché lineare solo per piccoli errori sugli angoli. Ne segue, ad esempio, che la media fra due coppie di componenti possa non corrispondere esattamente alla media dei due rispettivi angoli, oppure possa non risiedere precisamente sulla circonferenza unitaria.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\linewidth]{figures/angle-method-comparison.png}
+    \caption{Confronto dei metodi per la stima di angoli.}
+    \label{fig:angle-method-comparison}
+    \vspace{2\baselineskip}
+\end{figure}
+
+\section{Scelta dei vettori di stato e di misurazione}
+
+\begin{equation}
+z=\begin{pmatrix}
+\cos(\alpha) \\
+\sin(\alpha) \\
+\cos(\delta) \\
+\sin(\delta) \\
+V
+\end{pmatrix}
+\end{equation}
+\begin{equation}
+x=\begin{pmatrix}
+\cos(M) \\
+\sin(M) \\
+a \\
+e \\
+\cos(i) \\
+\sin(i) \\
+\cos(\Omega) \\
+\sin(\Omega) \\
+\cos(\omega) \\
+\sin(\omega) \\
+n \\
+H \\
+G
+\end{pmatrix}
 \end{equation}
 
 \chapter{Contribution}
