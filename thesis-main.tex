@@ -114,12 +114,12 @@ z_k=h(k,x_k)
 \end{gather*}
 La prima è detta ``equazione di stato'' e la seconda ``trasformazione di uscita''. \\
 
-Modellizzare la realtà comporta spesso che la legge di evoluzione $f$ del sistema sia non deterministica, per via di approssimazioni o fenomeni trascurati (\textit{process noise}, $w\in\mathbb{R}^n$), da cui l'importanza di effettuare misurazioni periodiche per monitorare la reale evoluzione dello stato.
+Modellizzare la realtà comporta spesso che non si conosca la vera legge di evoluzione $f_\text{reale}$, ma solo una sua approssimazione, quindi soggetta a disturbi o imprecisioni (\textit{process noise}, $w\in\mathbb{R}^n$), da cui l'importanza di effettuare misurazioni periodiche per monitorare la reale evoluzione dello stato.
 
 Poiché le misurazioni stesse sono soggette a disturbi (\textit{measurement noise}, $v\in\mathbb{R}^m$), il modello completo diventa:
 \begin{gather}
-x_k=f_\text{det}(k,x_{k-1},u_{k-1})+w_{k-1} \\
-z_k=h(k,x_k)+v_k
+x_k=f(k,x_{k-1},u_{k-1})+w_{k-1}\label{eq:fdet} \\
+z_k=h(k,x_k)+v_k\label{eq:hdet}
 \end{gather}
 
 Un caso particolare riguarda i modelli lineari, cioè esprimibili nella seguente forma matriciale:
@@ -325,7 +325,51 @@ P_k=\left(I-\mathcal{K}_kH_k\right)P_k^-
 
 \section{Varianti non lineari}
 
-Sulla base della formulazione originale di Kálmán, sono state sviluppate numerose varianti del filtro, con l'obiettivo principale di estenderne il campo di applicazione, specie a modelli non lineari. Si presenta qui un elenco delle varianti più conosciute, successivamente schematizzate in \cref{fig:variants-diagram}:
+Sulla base della formulazione originale di Kálmán --- oggi conosciuta come ``Standard'' Kalman Filter o KF --- sono state sviluppate numerose varianti del filtro, con l'obiettivo principale di estenderne il campo di applicazione, specie a modelli non lineari. Si presenta qui una descrizione delle varianti più conosciute, successivamente schematizzate in \cref{fig:variants-diagram}.
+
+\subsection*{Extended Kalman Filter}
+
+EKF~\cite{WelchB95} nasce dalle primissime applicazioni delle intuizioni di Kálmán e Bucy al programma Apollo~\cite{smith1962}. Si basa sull'utilizzo naturale del polinomio di Taylor di grado 1 per trovare approssimazioni lineari alle equazioni del sistema, in generale non lineari. \\
+Partendo dalla formula generale del polinomio in una variabile reale:
+\begin{equation*}
+f(x)=f(a)+f^\prime(a)(x-a)+o(x-a)
+\end{equation*}
+Applicandola alla legge di evoluzione $f$ di un sistema dinamico:
+\begin{equation*}
+f(k,x_{k-1},u_{k-1})\approx f(k,\hat{x}_{k-1},u_{k-1})+J_x\,f(k,\hat{x}_{k-1},u_{k-1})(x_{k-1}-\hat{x}_{k-1})
+\end{equation*}
+In questo caso, $f^\prime(a)$ è sostituita da $J_x\,f(k,\hat{x}_{k-1},u_{k-1})$, ossia la matrice jacobiana delle derivate parziali di $f$ rispetto ad $x$ calcolate in $k,\hat{x}_{k-1},u_{k-1}$. \\
+Da qui in poi verrà indicata con $A_k$, poiché verrà utilizzata nelle formule del filtro in modo identico alla matrice dinamica dei sistemi dinamici lineari.
+\begin{equation*}
+\bigl(A_k\bigr)_{ij}=\left.\dfrac{\partial f_i}{\partial x_j}\right\vert_{k,\hat{x}_{k-1},u_{k-1}}
+\end{equation*}
+Lo stesso ragionamento vale per la funzione di misurazione $h$:
+\begin{gather}
+h(k,x_k)\approx h(k,\hat{x}_k)+J_x\,h(k,\hat{x}_k)(x_{k-1}-\hat{x}_{k-1}) \\
+H_k=J_x\,h(k,\hat{x}_k)\Rightarrow\bigl(H_k\bigr)_{ij}=\left.\dfrac{\partial h_i}{\partial x_j}\right\vert_{k,\hat{x}_k}
+\end{gather}
+Dunque, il sistema è descritto dalle seguenti approssimazioni lineari:
+\begin{gather*}
+x_k\approx f(k,\hat{x}_{k-1},u_{k-1})+A_k(x_{k-1}-\hat{x}_{k-1})+w_{k-1} \\
+z_k\approx h(k,\hat{x}_k)+H_k(x_{k-1}-\hat{x}_{k-1})+v_k
+\end{gather*}
+Una volta determinate le matrici jacobiane $A_k$ e $H_k$, EKF fa uso delle stesse formule della controparte lineare per calcolare $P_k^-$,$P_k$ e $K_k$. Invece, dove possibile, ossia nel calcolo delle stime, utilizza direttamente le funzioni $f$ e $h$:
+\begin{gather*}
+\hat{x}_k^-=f(\hat{x}_{k-1},u_{k-1}) \\
+\hat{x}_k=\hat{x}_k^-+\mathcal{K}_k(z_k-h(\hat{x}_k^-))
+\end{gather*}
+Il filtro risultante è poco più complesso di KF, ma con un evidente vantaggio in termini di flessibilità. Tuttavia, il processo di linearizzazione è efficace solo per piccoli errori e può essere soggetto a rapida divergenza. \\
+
+Un logico sviluppo di queste idee prevede di includere anche i termini di secondo grado nelle espansioni in serie di Taylor. Si parla in questo caso di Second-Order Extended Kalman Filter, abbreviato EKF2 o SO-EKF.
+
+\subsection*{Unscented Kalman Filter}
+
+UKF~\cite{882463} è il più noto dei cosiddetti filtri Sigma-Point. Queste varianti selezionano deterministicamente un piccolo insieme di punti ($2n+1$ per UKF) attorno a $\hat{x}_{k-1}$ e studiano come questi reagiscono alla trasformazione non lineare, fornendo informazioni più accurate sulla distribuzione delle stime ottenute. \\
+
+UKF utilizza tre parametri che influenzano la scelta dei Sigma-Point: $\alpha\ll1$ ne determina la dispersione, mentre $\beta=2$ e $\kappa=0$ raramente richiedono di essere modificati.
+
+Determinato il parametro intermedio $\lambda=\alpha^2(n+\kappa)-n$, TODO...
+
 \begin{itemize}
 \item KF (``Standard'' Kalman Filter)~\cite{10.1115/1.3662552}~\cite{WelchB95}: Semplice ed ottimale per sistemi lineari.
 \item EKF (Extended Kalman Filter)\iffalse~\cite{smith1962}\fi~\cite{WelchB95}: Basato sulla linearizzazione di una funzione di transizione non lineare, con rischio di divergenza.
