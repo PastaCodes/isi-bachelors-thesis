@@ -47,6 +47,8 @@ II % TODO: verificare
 
 \mainlinespacing{1.241} % line spacing in mainmatter, comment to default (1)
 
+\lstset{language=Python,basicstyle=\small\ttfamily}
+
 \begin{document}
 
 \frontmatter\frontispiece
@@ -107,7 +109,8 @@ $$\dfrac{d}{dt}\bigl(x(t)\bigr)=f\bigl(t,x(t)\bigr)$$ \pagebreak
 Tuttavia, si può decidere di considerare lo stato soltanto in determinati istanti $t_k$. Ne risultano modelli discreti, su cui si concentrerà questa tesi, i quali possono essere espressi con relazioni di ricorrenza:
 $$x_k=f(k,x_{k-1})$$
 
-In genere si sceglie di esplicitare la presenza di ingressi $u\in\mathbb{R}^l$ nel sistema (\textit{control input}, es.: forza di gravità, propulsione...), assunti deterministici, e di misurazioni $z\in\mathbb{R}^m$ (\textit{measurement}), effettuate sulle variabili osservate. Dunque il modello viene espresso con le equazioni:
+In genere si sceglie di esplicitare la presenza di ingressi $u\in\mathbb{R}^l$ nel sistema (\textit{control input}, es.: forza di gravità, propulsione...), assunti deterministici, e di misurazioni $z\in\mathbb{R}^m$ (\textit{measurement}), effettuate sulle variabili osservate. \\
+Dunque il modello viene espresso con le equazioni:
 \begin{gather*}
 x_k=f(k,x_{k-1},u_{k-1}) \\
 z_k=h(k,x_k)
@@ -136,12 +139,12 @@ Dalla combinazione delle imprecisioni nel modello e nelle misurazioni, nasce la 
 \section{Il filtro di Kalman}
 
 Il filtro di Kalman~\cite{10.1115/1.3662552}~\cite{WelchB95}~\cite{10.1145/3363294} è uno stimatore lineare ricorsivo che minimizza l'errore quadratico medio. \\
-L'aspetto ricorsivo implica, innanzitutto, che si tratta di un filtro a tempo discreto e si rifà al fatto che ogni stima $\hat{x}_k$ è determinata in base alla stima precedente $\hat{x}_{k-1}$ e alla misurazione attuale $z_k$, senza richiedere l'utilizzo esplicito di $\hat{x}_0,\hat{x}_1,...,\hat{x}_{k-2}$ o $z_0,...,z_{k-1}$. Si tratta di uno dei principali vantaggi del filtro, in quanto riduce sia la complessità temporale che quella spaziale, senza compromettere l'ottimalità. \\
+L'aspetto ricorsivo implica, innanzitutto, che si tratta di un filtro a tempo discreto e si rifà al fatto che ogni stima $\hat{x}_k$ è determinata in base alla stima precedente $\hat{x}_{k-1}$ e alla misurazione attuale $z_k$, senza richiedere l'utilizzo esplicito di $\hat{x}_0,\hat{x}_1,...,\hat{x}_{k-2}$ o $z_1,...,z_{k-1}$. Si tratta di uno dei principali vantaggi del filtro, in quanto riduce sia la complessità temporale che quella spaziale, senza compromettere l'ottimalità. \\
 Come anticipato, l'ottimalità è definita dal fatto che, ad ogni passo $k$, l'algoritmo produce la stima $\hat{x}_k$ che minimizza la quantità $\mathbb{E}[\lVert e_k\rVert^2]$, con $e_k=\hat{x}_k-x_k$. \\
 
 Il filtro è applicabile a un qualsiasi modello lineare a tempo discreto, anche tempo-variante, ossia descritto dalle equazioni \ref{eq:transition} e \ref{eq:output}.
 
-Sono, però, posti vincoli di non correlazione sulle variabili aleatorie:
+Sono posti, però, vincoli di non correlazione sulle variabili aleatorie:
 \begin{align*}
 & \mathrm{Cov}(w_k,v_j)=0_{n\times m}, && \forall\,k,\forall\,j \\
 & \mathrm{Cov}(w_k,u_j)=0_{n\times l}, && \forall\,k,\forall\,0\leq j\leq k-1 \\
@@ -166,11 +169,11 @@ Per quanto riguarda il passo $k=0$, la scelta della stima iniziale $\hat{x}_0$ �
 
 Una condizione implicita sul filtro richiede che anche l'errore sulle stime generate $e_k$ sia privo di \textit{bias}, ossia, ad ogni passo $k$:
 $$\mathbb{E}[e_k]=\mathbb{E}[\hat{x}_k-x_k]=\underline{0}$$
-Da questa condizione si otterranno informazioni sulle matrici incognite $\mathcal{A}$, $\mathcal{B}$ e $\mathcal{K}$. In effetti, considerando per $k\geq 1$ e sostituendo $\hat{x}_k$ con la sua definizione (\ref{eq:generic-estimate}), si ottiene:
+Da questa condizione si otterranno informazioni sulle matrici incognite $\mathcal{A}$, $\mathcal{B}$ e $\mathcal{K}$. In effetti, considerando per $k\geq 1$ e sostituendo $\hat{x}_k$ con la sua definizione (eq.~\ref{eq:generic-estimate}), si ottiene:
 $$\mathbb{E}[\mathcal{A}_k\hat{x}_{k-1}+\mathcal{B}_ku_{k-1}+\mathcal{K}_kz_k-x_k]=\underline{0}$$
-Successivamente, sostituendo $z_k$ con la sua definizione (\ref{eq:output}):
+Successivamente, sostituendo $z_k$ con la sua definizione (eq.~\ref{eq:output}):
 $$\mathbb{E}\left[\mathcal{A}_k\hat{x}_{k-1}+\mathcal{B}_ku_{k-1}+\mathcal{K}_k\bigl(H_kx_k+v_k\bigr)-x_k\right]=\underline{0}$$
-Sostituendo $x_k$ con la relazione di ricorrenza (\ref{eq:transition}) e manipolando i termini:
+Sostituendo $x_k$ con la relazione di ricorrenza (eq.~\ref{eq:transition}) e manipolando i termini:
 \begin{gather*}
 \begin{multlined}[\textwidth]
 \mathbb{E}\Bigl[\mathcal{A}_k\hat{x}_{k-1}+\mathcal{B}_ku_{k-1}+\mathcal{K}_k\Bigl(H_k\bigl(A_kx_{k-1}+B_ku_{k-1}+w_{k-1}\bigr)+v_k\Bigr)+ \\
@@ -248,7 +251,7 @@ Per trovare un'espressione per $P_k$, si consideri inizialmente:
 \hat{x}_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kz_k \\
 \Rightarrow e_k=\hat{x}_k-x_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kz_k-x_k
 \end{gather*}
-Sostituendo $z_k$ con la sua definizione (\ref{eq:output}):
+Sostituendo $z_k$ con la sua definizione (eq.~\ref{eq:output}):
 \begin{gather*}
 e_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_k(H_kx_k+v_k)-x_k= \\
 =(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kH_kx_k+\mathcal{K}_kv_k-x_k= \\
@@ -311,7 +314,7 @@ P_k=P_k^--P_k^-{H_k}^T{\mathcal{K}_k}^T-\mathcal{K}_kH_kP_k^-+\mathcal{K}_kH_kP_
 =\left(I-\mathcal{K}_kH_k\right)P_k^-
 \end{gather*}
 
-Riassumendo, l'algoritmo si basa sulle seguenti equazioni:
+Riassumendo, l'algoritmo si basa sulle seguenti formule:
 \begin{gather*}
 \hat{x}_0=\mathbb{E}[x_0] \\
 P_0=\mathrm{Cov}(x_0,x_0) \\[0.2\baselineskip]
@@ -329,31 +332,31 @@ Sulla base della formulazione originale di Kálmán --- oggi conosciuta come ``S
 
 \subsection*{Extended Kalman Filter}
 
-EKF~\cite{WelchB95} nasce dalle primissime applicazioni delle intuizioni di Kálmán e Bucy al programma Apollo~\cite{smith1962}. Si basa sull'utilizzo naturale del polinomio di Taylor di grado 1 per trovare approssimazioni lineari alle equazioni del sistema, in generale non lineari. \\
+EKF~\cite{WelchB95} nasce dalle prime applicazioni delle intuizioni di Kálmán e Bucy al programma Apollo~\cite{smith1962}. Si basa sull'utilizzo naturale del polinomio di Taylor di grado 1 per trovare approssimazioni lineari alle equazioni del sistema, in generale non lineari. \\
 Partendo dalla formula generale del polinomio in una variabile reale:
 \begin{equation*}
 f(x)=f(a)+f^\prime(a)(x-a)+o(x-a)
 \end{equation*}
-Applicandola alla legge di evoluzione $f$ di un sistema dinamico:
+e applicandola alla legge di evoluzione $f$ di un sistema dinamico, si ottiene:
 \begin{equation*}
-f(k,x_{k-1},u_{k-1})\approx f(k,\hat{x}_{k-1},u_{k-1})+J_x\,f(k,\hat{x}_{k-1},u_{k-1})(x_{k-1}-\hat{x}_{k-1})
+f(k,x_{k-1},u_{k-1})\approx f(k,\hat{x}_{k-1},u_{k-1})+\mathrm{J}_xf(k,\hat{x}_{k-1},u_{k-1})(x_{k-1}-\hat{x}_{k-1})
 \end{equation*}
-In questo caso, $f^\prime(a)$ è sostituita da $J_x\,f(k,\hat{x}_{k-1},u_{k-1})$, ossia la matrice jacobiana delle derivate parziali di $f$ rispetto ad $x$ calcolate in $k,\hat{x}_{k-1},u_{k-1}$. \\
+Qui, $f^\prime(a)$ è sostituita da $\mathrm{J}_xf(k,\hat{x}_{k-1},u_{k-1})$, ossia dalla matrice jacobiana delle derivate parziali di $f$ rispetto ad $x$ calcolate in $k,\hat{x}_{k-1},u_{k-1}$. \\
 Da qui in poi verrà indicata con $A_k$, poiché verrà utilizzata nelle formule del filtro in modo identico alla matrice dinamica dei sistemi dinamici lineari.
 \begin{equation*}
 \bigl(A_k\bigr)_{ij}=\left.\dfrac{\partial f_i}{\partial x_j}\right\vert_{k,\hat{x}_{k-1},u_{k-1}}
 \end{equation*}
 Lo stesso ragionamento vale per la funzione di misurazione $h$:
-\begin{gather}
-h(k,x_k)\approx h(k,\hat{x}_k)+J_x\,h(k,\hat{x}_k)(x_{k-1}-\hat{x}_{k-1}) \\
-H_k=J_x\,h(k,\hat{x}_k)\Rightarrow\bigl(H_k\bigr)_{ij}=\left.\dfrac{\partial h_i}{\partial x_j}\right\vert_{k,\hat{x}_k}
-\end{gather}
+\begin{gather*}
+h(k,x_k)\approx h(k,\hat{x}_k)+\mathrm{J}_xh(k,\hat{x}_k)(x_{k-1}-\hat{x}_{k-1}) \\
+H_k=\mathrm{J}_xh(k,\hat{x}_k)\Rightarrow\bigl(H_k\bigr)_{ij}=\left.\dfrac{\partial h_i}{\partial x_j}\right\vert_{k,\hat{x}_k}
+\end{gather*}
 Dunque, il sistema è descritto dalle seguenti approssimazioni lineari:
 \begin{gather*}
 x_k\approx f(k,\hat{x}_{k-1},u_{k-1})+A_k(x_{k-1}-\hat{x}_{k-1})+w_{k-1} \\
 z_k\approx h(k,\hat{x}_k)+H_k(x_{k-1}-\hat{x}_{k-1})+v_k
 \end{gather*}
-Una volta determinate le matrici jacobiane $A_k$ e $H_k$, EKF fa uso delle stesse formule della controparte lineare per calcolare $P_k^-$,$P_k$ e $K_k$. Invece, dove possibile, ossia nel calcolo delle stime, utilizza direttamente le funzioni $f$ e $h$:
+Una volta determinate le matrici jacobiane $A_k$ e $H_k$, EKF fa uso delle stesse formule di KF per il calcolo di $P_k^-$,$P_k$ e $K_k$. Dove possibile, ossia per il calcolo delle stime, utilizza, invece, le funzioni $f$ e $h$ direttamente:
 \begin{gather*}
 \hat{x}_k^-=f(\hat{x}_{k-1},u_{k-1}) \\
 \hat{x}_k=\hat{x}_k^-+\mathcal{K}_k(z_k-h(\hat{x}_k^-))
@@ -368,8 +371,62 @@ UKF~\cite{882463} è il più noto dei cosiddetti filtri Sigma-Point. Queste vari
 
 UKF utilizza tre parametri che influenzano la scelta dei Sigma-Point: $\alpha\ll1$ ne determina la dispersione, mentre $\beta=2$ e $\kappa=0$ raramente richiedono di essere modificati.
 
-Determinato il parametro intermedio $\lambda=\alpha^2(n+\kappa)-n$, TODO...
+Una volta determinato il parametro intermedio $\lambda=\alpha^2(n+\kappa)-n$, si calcola la matrice $(\lambda+n)P_{k-1}$ e si utilizza un metodo di decomposizione, come l'algoritmo di Cholesky, per trovare $U=\sqrt{(\lambda+n)P_{k-1}}$. \\
+Ora, indicando con $U_{[i]}$ la $i$-esima riga di $U$, i punti selezionati sono dati da:
+\begin{equation*}
+\mathbf{x}_{k-1}^{(i)}=\begin{cases}
+\hat{x}_{k-1} & \text{se }i=0 \\
+\hat{x}_{k-1}+U_{[i]} & \text{se }i=1,...,n \\
+\hat{x}_{k-1}-U_{[i-n]} & \text{se }i=n+1,...,2n
+\end{cases}
+\end{equation*}
+A ciascuno viene anche associato un peso fisso sul calcolo del valore medio e uno sul calcolo della covarianza:
+\begin{gather*}
+\begin{aligned}
+W^{(\text{mean},i)}=&\begin{cases}
+\frac{\lambda}{\lambda+n} & \text{se }i=0 \\
+\frac{1}{2(\lambda+n)} & \text{se }i=1,...,2n
+\end{cases} \\
+W^{(\text{cov},i)}=&\begin{cases}
+\frac{\lambda}{\lambda+n}+(1-\alpha^2+\beta) & \text{se }i=0 \\
+\frac{1}{2(\lambda+n)} & \text{se }i=1,...,2n
+\end{cases}
+\end{aligned}
+\end{gather*}
+Dunque, viene applicata la trasformazione non lineare, per determinare la stima \textit{a priori} e la sua covarianza come somme pesate:
+\begin{gather*}
+\mathbf{x}_k^{(i)}=f(k,\mathbf{x}_{k-1}^{(i)},u_{k-1})\quad\forall\,i=0,...,2n \\
+\hat{x}_k^-=\sum_{i=0}^{2n}W^{(\text{mean},i)}\mathbf{x}_k^{(i)} \\
+P_k^-=\sum_{i=0}^{2n}W^{(\text{cov},i)}\left(\mathbf{x}_k^{(i)}-\hat{x}_k^-\right)\left(\mathbf{x}_k^{(i)}-\hat{x}_k^-\right)^T
+\end{gather*}
+Similmente, nella fase di correzione viene applicata la trasformazione $h$ per trovare una previsione della misurazione $\hat{z}_k^-$ (si mantiene la notazione all'apice per indicare che il calcolo viene effettuato prima della misurazione, seppure non sia necessario migliorare successivamente questa stima). Ne viene poi calcolata sia la autocovarianza che la covarianza incrociata con la stima \textit{a priori}:
+\begin{gather*}
+\mathbf{z}_k^{(i)}=h(k,\mathbf{x}_{k-1}^{(i)})\quad\forall\,i=0,...,2n \\
+\hat{z}_k^-=\sum_{i=0}^{2n}W^{(\text{mean},i)}\mathbf{z}_k^{(i)} \\
+\mathrm{Cov}(\hat{z}_k^-,\hat{z}_k^-)=\sum_{i=0}^{2n}W^{(\text{cov},i)}\left(\mathbf{z}_k^{(i)}-\hat{z}_k^-\right)\left(\mathbf{z}_k^{(i)}-\hat{z}_k^-\right)^T \\
+\mathrm{Cov}(\hat{x}_k^-,\hat{z}_k^-)=\sum_{i=0}^{2n}W^{(\text{cov},i)}\left(\mathbf{x}_k^{(i)}-\hat{x}_k^-\right)\left(\mathbf{z}_k^{(i)}-\hat{z}_k^-\right)^T
+\end{gather*}
+A questo punto, la matrice dei guadagni di Kalman viene calcolata come:
+\begin{equation*}
+\mathcal{K}_k=\mathrm{Cov}(\hat{x}_k^-,\hat{z}_k^-)\mathrm{Cov}(\hat{z}_k^-,\hat{z}_k^-)^{-1}
+\end{equation*}
+Infine, la stima \textit{a posteriori} e la relativa autocovarianza sono date da:
+\begin{gather*}
+\hat{x}_k=\hat{x}_k^-+\mathcal{K}_k(z_k-\hat{z}_k^-) \\
+P_k=P_k^--\mathcal{K}_k\mathrm{Cov}(\hat{z}_k^-,\hat{z}_k^-)\mathcal{K}_k^T
+\end{gather*}
 
+UKF permette di determinare stime accurate quanto un polinomio di Taylor di grado 3, ma con la stessa complessità computazionale di EKF base.
+
+Sono disponibili diverse implementazioni di questo algoritmo. In questa tesi si farà uso della classe \lstinline{filterpy.kalman.UnscentedKalmanFilter}, con i relativi Sigma-Point \lstinline{filterpy.kalman.sigma_points.MerweScaledSigmaPoints}. \\
+
+Altre varianti di tipo Sigma-Point includono i filtri Quadrature KF (QKF), fra cui il più conosciuto Gauss-Hermite Kalman Filter (GHKF), basati sulle formule di integrazione numerica (o quadratura numerica) di Gauss, e i Cubature KF (CKF), che utilizzano la ``regola di cubatura'', ossia l'applicazione delle stesse regole di quadratura ad uno spazio in coordinate sferiche.
+
+\subsection*{Metodo Monte Carlo}
+
+% TODO
+
+\iffalse % Discarded list
 \begin{itemize}
 \item KF (``Standard'' Kalman Filter)~\cite{10.1115/1.3662552}~\cite{WelchB95}: Semplice ed ottimale per sistemi lineari.
 \item EKF (Extended Kalman Filter)\iffalse~\cite{smith1962}\fi~\cite{WelchB95}: Basato sulla linearizzazione di una funzione di transizione non lineare, con rischio di divergenza.
@@ -391,6 +448,7 @@ Determinato il parametro intermedio $\lambda=\alpha^2(n+\kappa)-n$, TODO...
 \end{itemize}
 
 Nell'utilizzo delle varianti EKF e Sigma-Point, spesso si sceglie di memorizzare $P_k$ fattorizzata sotto forma di radice quadrata $\sqrt{P_k}$, per favorire la stabilità numerica dell'algoritmo. Si parla, in questo caso, di SRKF (Square-Root Kalman Filters). \pagebreak
+\fi
 
 \begin{figure}
     \centering
