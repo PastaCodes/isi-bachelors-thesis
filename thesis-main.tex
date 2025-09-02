@@ -424,7 +424,7 @@ Altre varianti di tipo Sigma-Point includono i filtri Quadrature KF (QKF), fra c
 
 \subsection*{Metodo Monte Carlo}
 
-% TODO
+Un'ulteriore strategia per lo studio della distribuzione di una variabile aleatoria sottoposta ad una trasformazione non lineare è il classico metodo Monte Carlo. Diversamente dai metodi Sigma-Point, si considerano campioni cospicui di punti, consentendo di raggiungere precisione arbitraria a costo di un maggiore onere computazionale, il quale, però, può essere facilmente distribuito con tecniche di parallelizzazione. Da queste idee nascono Ensemble KF (EnKF), che richiede distribuzioni iniziali Gaussiane, e i Particle Filters (PF), estremamente flessibili, ma meno efficienti.
 
 \iffalse % Discarded list
 \begin{itemize}
@@ -460,9 +460,7 @@ Nell'utilizzo delle varianti EKF e Sigma-Point, spesso si sceglie di memorizzare
 
 \section{Sviluppi recenti}
 
-Lo studio del filtro di Kalman resta un settore vivo, a più di 60 anni dalla sua concezione. Si continuano a identificare nuovi settori di applicazione, nuove tecniche di miglioramento dell'accuratezza, della stabilità numerica e della performance computazionale. Nuove varianti, sia generiche che specializzate, si aggiungono a quelle già consolidate. \\
-Iteratively Saturated Kalman Filtering~\cite{yang2025} \\
-AI-Aided Kalman Filters~\cite{shlezinger2025}
+Lo studio del filtro di Kalman resta un settore vivo, a più di 60 anni dalla sua concezione. Si continuano a identificare nuovi settori di applicazione, nuove tecniche di miglioramento dell'accuratezza, della stabilità numerica e della performance computazionale. Nuove varianti, sia generiche che specializzate, si aggiungono a quelle già consolidate. Solo negli ultimi mesi si evidenziano una tecnica di ``Iteratively Saturated Kalman Filtering'' (ISKF)~\cite{yang2025}, che mira a ridurre l'impatto di eventuali misurazioni anomale, e la possibilità di affiancare una rete neurale profonda (DNN) ad un filtro classico nei cosiddetti ``AI-Aided Kalman Filters''~\cite{shlezinger2025}.
 
 \section{Limitazioni}
 
