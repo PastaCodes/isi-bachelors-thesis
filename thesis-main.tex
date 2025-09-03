@@ -501,8 +501,8 @@ Nel 1960, Kálmán pubblicò la descrizione del filtro a tempo discreto~\cite{10
 
 \section{Coordinate celesti}
 
-Le osservazioni raccolte dal Minor Planet Center fanno uso di una coppia di angoli $(\alpha,\delta)$ per identificare la posizione dei corpi nella sfera celeste, o, più precisamente, per identificare la direzione orientata dall'osservatore verso la posizione apparente del corpo considerato. I due angoli sono definiti con riferimento al piano equatoriale e al punto vernale all'epoca J2000.0 (mezzogiorno del 1° gennaio 2000, calendario gregoriano e tempo terrestre). Nella pratica si considerano assi orientati secondo il sistema ICRS, adottato dalla International Astronomical Union dal 1° gennaio 1998, spostando l'origine dal baricentro del sistema solare alla posizione dell'osservatore (osservazione topocentrica). In questo contesto, l'ascensione retta $\alpha\in[0,2\pi)$ rappresenta la rotazione attorno all'asse z, mentre la declinazione $\delta\in\left[-\frac{\pi}{2},\frac{\pi}{2}\right]$ rappresenta la distanza angolare dal piano xy. Dunque, indicando con $\Delta$ la distanza apparente tra l'osservatore e il corpo al momento dell'osservazione, la posizione apparente del corpo osservato, in coordinate cartesiane topocentriche, è data da:
-\begin{equation}
+Le osservazioni astrometriche fanno uso di una coppia di angoli $(\alpha,\delta)$ per identificare la posizione dei corpi nella sfera celeste, o, più precisamente, per identificare la direzione orientata dall'osservatore verso la posizione apparente del corpo considerato. I due angoli sono definiti con riferimento al piano equatoriale e al punto vernale dell'epoca J2000.0 (mezzogiorno del 1° gennaio 2000, calendario gregoriano e tempo terrestre). Nella pratica si considerano assi orientati secondo il sistema ICRS, adottato dalla International Astronomical Union dal 1° gennaio 1998, spostando l'origine dal baricentro del sistema solare alla posizione dell'osservatore (osservazione topocentrica). In questo contesto, l'ascensione retta $\alpha\in[0,2\pi)$ rappresenta la rotazione attorno all'asse z, mentre la declinazione $\delta\in\left[-\frac{\pi}{2},\frac{\pi}{2}\right]$ rappresenta la distanza angolare dal piano xy. Dunque, indicando con $\Delta$ la distanza apparente tra l'osservatore e il corpo al momento dell'osservazione, la posizione apparente del corpo osservato, in coordinate cartesiane topocentriche, è data da:
+\begin{equation}\label{eq:radec2pos}
 \begin{pmatrix} x \\ y \\ z \end{pmatrix}=R_z(\alpha)\,R_y(-\delta)\begin{pmatrix} \Delta \\ 0 \\ 0 \end{pmatrix}=\begin{pmatrix} \Delta\cos(\delta)\cos(\alpha) \\ \Delta\cos(\delta)\sin(\alpha) \\ \Delta\sin(\delta) \end{pmatrix}
 \end{equation}
 La conversione a coordinate baricentriche richiede semplicemente di sommare la posizione dell'osservatore rispetto al baricentro del sistema solare.
@@ -514,8 +514,8 @@ Si è parlato finora di quantità apparenti. Questa precisazione è necessaria p
 
 Con questa semplificazione diventa possibile considerare il triangolo tra il corpo osservato, l'osservatore e il Sole e applicare il teorema dei seni per determinare relazioni fra gli angoli e le distanze. In particolare:
 \begin{gather}
-\frac{d}{\sin(\theta)}=\frac{R}{\sin(\phi)} \\
-\frac{\Delta}{\sin(\pi-\theta-\phi)}=\frac{R}{\sin(\phi)}\Rightarrow\frac{\Delta}{\sin(\theta+\phi)}=\frac{R}{\sin(\phi)}
+\frac{d}{\sin(\theta)}=\frac{R}{\sin(\phi)}\label{eq:sinelaw-d} \\
+\frac{\Delta}{\sin(\pi-\theta-\phi)}=\frac{R}{\sin(\phi)}\Rightarrow\frac{\Delta}{\sin(\theta+\phi)}=\frac{R}{\sin(\phi)}\label{eq:sinelaw-delta}
 \end{gather}
 
 \section{Fotometria e il sistema H-G}\label{sec:photometry}
@@ -524,7 +524,7 @@ L'intensità della luce osservata è espressa dalla magnitudine apparente e può
 
 Una delle prime applicazioni delle nozioni di fotometria allo studio degli asteroidi ha prodotto il modello H-G~\cite{bowell1989}~\cite{dymock2007}, usato tuttora quando non si dispone di informazioni sufficienti per impiegare modelli più precisi. Gli asteroidi vengono caratterizzati da due parametri: $H$, detta magnitudine assoluta, che equivale alla magnitudine apparente per $d=\Delta=1~\mathrm{AU}$ e $\phi=0$\quad e $G$, detto \textit{slope parameter}, che quantifica un picco di luminosità che spesso si verifica nella curva di fase vicino all'opposizione. Se si esprimono le distanze in unità astronomiche, la magnitudine apparente è descritta da:
 \begin{gather}
-V=H+5\log_{10}(d\Delta)-2.5\log_{10}(\Phi(\phi)) \\
+V=H+5\log_{10}(d\Delta)-2.5\log_{10}(\Phi(\phi))\label{eq:hg-mag} \\
 \Phi(\phi)=(1-G)\exp\left(-3.33\bigl(\tan\left(\tfrac{\phi}{2}\right)\bigr)^{0.63}\right)+G\exp\left(-1.87\bigl(\tan\left(\tfrac{\phi}{2}\right)\bigr)^{1.22}\right)
 \end{gather}
 
@@ -567,7 +567,51 @@ Infine, la distanza radiale è legata all'anomalia eccentrica da:
 r=a(1-e\cos(E))
 \end{equation}
 
-\chapter{Applicazione del filtro}
+\chapter{Applicazione a dati reali}
+
+Il Minor Planet Center raccoglie dati su osservazioni ottiche astrometriche di corpi minori, comete e satelliti naturali, effettuate da osservatori in tutto il mondo. I dati sono forniti senza alcun tipo di correzione, come specificato nelle linee guida (\url{https://minorplanetcenter.net/iau/info/Astrometry.html#corrs}). Questo li rende difficili da utilizzare direttamente. In effetti, si comincerà considerando un approccio ``naïve'', procedendo poi con l'applicazione del filtro di Kalman ed evidenziando la precisione aggiuntiva ottenuta.
+
+\section{Formato dei dati}
+
+Moduli Python esistenti come \lstinline{astroquery} consentono di richiedere automaticamente le osservazioni; tuttavia si possono scaricare archivi più completi direttamente dalla piattaforma web \url{https://www.minorplanetcenter.net/db_search}.
+
+Questi archivi sono file di testo in classico stile Fortran a 80 colonne e seguono il formato descritto alla pagina \url{https://www.minorplanetcenter.net/iau/info/OpticalObs.html}. In particolare, contengono le seguenti informazioni di nostro interesse:
+\begin{itemize}
+% \item il metodo di osservazione utilizzato (fotografico, CCD, CMOS, ...)
+\item l'ascensione retta, espressa come angolo orario, minuti e secondi
+\item la declinazione, espressa in gradi, minuti e secondi
+\item la magnitudine osservata
+\item la banda utilizzata, ossia un'indicazione della fascia di frequenze elettromagnetiche considerate
+\item il codice dell'osservatorio
+\end{itemize}
+Il file \lstinline{parse.py} si occupa dell'interpretazione dei dati e della trasformazione in oggetti \lstinline{MinorPlanetObservation}. Questo passaggio richiede la conversione degli angoli in radianti e della magnitudine osservata in magnitudine visuale. In effetti, i modelli fotometrici si basano sulla magnitudine relativa alla luce visibile, per cui può essere necessario utilizzare la tabella di conversione fornita alla pagina \url{https://www.minorplanetcenter.net/iau/info/BandConversion.txt}. \\
+Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore.
+
+\section{Approccio naïve}
+
+Se si conosce la distanza del corpo $\Delta$, diventa possibile determinarne la posizione dagli angoli $\alpha,\delta$ tramite la formula~\ref{eq:radec2pos}. Dunque si vuole risalire a $\Delta$ dalla magnitudine visuale $V$, idealmente sfruttando la formula~\ref{eq:hg-mag}. Tuttavia non si dispone della distanza dal Sole $d$ e dell'angolo di fase $\phi$. Una possibile soluzione prevede di risolvere in $\phi$ la seguente equazione tramite metodi numerici:
+\begin{equation}
+R^2\sin(\theta)\sin(\theta+\phi)-10^{0.2(V-H)}\sin^2(\phi)\sqrt{\Phi(\phi)}=0
+\end{equation}
+Tale equazione deriva dai seguenti passaggi:
+\begin{gather*}
+V=H+5\log_{10}(d\Delta)-2.5\log_{10}(\Phi(\phi)) \\
+\rightarrow 0.2(V-H)+\log_{10}\left((\Phi(\phi))^{0.5}\right)=\log_{10}(d\Delta) \\
+\rightarrow d\Delta=10^{0.2(V-H)}\sqrt{\Phi(\phi)}
+\end{gather*}
+Utilizzando le equazioni~\ref{eq:sinelaw-d} e \ref{eq:sinelaw-delta}, si trova che:
+\begin{equation*}
+d\Delta=\dfrac{R^2\sin(\theta)\sin(\theta+\phi)}{\sin^2(\phi)}
+\end{equation*}
+Sostituendo e moltiplicando entrambi i lati per $\sin^2(\phi)$ si ottiene l'espressione desiderata. Si osservi che per $\phi=0$ e $\phi=\pi$ sarebbe impossibile effettuare osservazioni valide, per cui si può assumere $\sin(\phi)\neq0$. Lo stesso vale per l'elongazione $\theta$. \\
+Il vantaggio di questa specifica formulazione sta nel fatto che l'espressione ha valore positivo finito per $\phi=0$, ovvero $R^2\sin^2(\theta)$, e ha valore negativo finito per $\phi\to\pi$, ovvero $-R^2\sin^2(\theta)$, il che permette di utilizzare il metodo di Brent nell'intervallo $[0,\pi]$. \\
+Una volta determinata una radice, la distanza è data da:
+\begin{equation}
+\Delta=\dfrac{R\sin(\theta+\phi)}{\sin(\phi)}
+\end{equation}
+% TODO: più radici?
+% TODO: mostrare il codice che implementa
+% TODO: theta e R da efemeridi
 
 \section{Sfide sul tracciamento di angoli}
 
@@ -616,6 +660,7 @@ G
 \end{pmatrix}
 \end{equation}
 
+\iffalse % Template chapter
 \chapter{Contribution}
 
 You may also put some code snippet (which is NOT float by default), eg: \cref{lst:random-code}.
@@ -623,6 +668,7 @@ You may also put some code snippet (which is NOT float by default), eg: \cref{ls
 \lstinputlisting[float,language=Java,label={lst:random-code}]{listings/HelloWorld.java}
 
 \section{Fancy formulas here}
+\fi
 
 %----------------------------------------------------------------------------------------
 % BIBLIOGRAPHY
