@@ -54,12 +54,15 @@ II % TODO: verificare
 \frontmatter\frontispiece
 
 \begin{abstract}	
-Max 2000 characters, strict.
+% Max 2000 characters, strict.
+TODO
 \end{abstract}
 
+\iffalse
 \begin{dedication} % this is optional
 Optional. Max a few lines.
 \end{dedication}
+\fi
 
 %----------------------------------------------------------------------------------------
 \tableofcontents   
@@ -74,6 +77,9 @@ Optional. Max a few lines.
 \label{chap:introduction}
 %----------------------------------------------------------------------------------------
 
+TODO
+
+\iffalse
 Write your intro here.
 \sidenote{Add sidenotes in this way. They are named after the author of the thesis}
 
@@ -89,12 +95,17 @@ In some cases, you may need a plural form of the acronym.
 For instance,
 that you are discussing \acp{vm},
 you may need both \ac{vm} and \acp{vm}.
+\fi
 
-\paragraph{Structure of the Thesis}
+\paragraph{Struttura della tesi}
 
-\note{At the end, describe the structure of the paper}
+TODO
 
+% \note{At the end, describe the structure of the paper}
+
+%----------------------------------------------------------------------------------------
 \chapter{Fondamenti teorici}
+%----------------------------------------------------------------------------------------
 
 In questo capitolo si definiscono i concetti di base su cui si svilupperanno gli argomenti di questa tesi, insieme ai modelli matematici che li descrivono. Si presenta, inoltre, una costruzione algebrica del filtro di Kalman e si offre una panoramica delle sue varianti.
 
@@ -330,7 +341,7 @@ P_k=\left(I-\mathcal{K}_kH_k\right)P_k^-
 
 Sulla base della formulazione originale di Kálmán --- oggi conosciuta come ``Standard'' Kalman Filter o KF --- sono state sviluppate numerose varianti del filtro, con l'obiettivo principale di estenderne il campo di applicazione, specie a modelli non lineari. Si presenta qui una descrizione delle varianti più conosciute, successivamente schematizzate in \cref{fig:variants-diagram}.
 
-\subsection*{Extended Kalman Filter}
+\subsection{Extended Kalman Filter}
 
 EKF~\cite{WelchB95} nasce dalle prime applicazioni delle intuizioni di Kálmán e Bucy al programma Apollo~\cite{smith1962}. Si basa sull'utilizzo naturale del polinomio di Taylor di grado 1 per trovare approssimazioni lineari alle equazioni del sistema, in generale non lineari. \\
 Partendo dalla formula generale del polinomio in una variabile reale:
@@ -365,7 +376,7 @@ Il filtro risultante è poco più complesso di KF, ma con un evidente vantaggio 
 
 Un logico sviluppo di queste idee prevede di includere anche i termini di secondo grado nelle espansioni in serie di Taylor. Si parla in questo caso di Second-Order Extended Kalman Filter, abbreviato EKF2 o SO-EKF.
 
-\subsection*{Unscented Kalman Filter}
+\subsection{Unscented Kalman Filter}
 
 UKF~\cite{882463} è il più noto dei cosiddetti filtri Sigma-Point. Queste varianti selezionano deterministicamente un piccolo insieme di punti ($2n+1$ per UKF) attorno a $\hat{x}_{k-1}$ e studiano come questi reagiscono alla trasformazione non lineare, fornendo informazioni più accurate sulla distribuzione delle stime ottenute. \\
 
@@ -422,7 +433,7 @@ Sono disponibili diverse implementazioni di questo algoritmo. In questa tesi si 
 
 Altre varianti di tipo Sigma-Point includono i filtri Quadrature KF (QKF), fra cui il più conosciuto Gauss-Hermite Kalman Filter (GHKF), basati sulle formule di integrazione numerica (o quadratura numerica) di Gauss, e i Cubature KF (CKF), che utilizzano la ``regola di cubatura'', ossia l'applicazione delle stesse regole di quadratura ad uno spazio in coordinate sferiche.
 
-\subsection*{Metodo Monte Carlo}
+\subsection{Metodo Monte Carlo}
 
 Un'ulteriore strategia per lo studio della distribuzione di una variabile aleatoria sottoposta ad una trasformazione non lineare è il classico metodo Monte Carlo. Diversamente dai metodi Sigma-Point, si considerano campioni cospicui di punti, consentendo di raggiungere precisione arbitraria a costo di un maggiore onere computazionale, il quale, però, può essere facilmente distribuito con tecniche di parallelizzazione. Da queste idee nascono Ensemble KF (EnKF), che richiede distribuzioni iniziali Gaussiane, e i Particle Filters (PF), estremamente flessibili, ma meno efficienti.
 
@@ -497,16 +508,21 @@ Nel 1960, Kálmán pubblicò la descrizione del filtro a tempo discreto~\cite{10
 \section{AI-Aided Kalman Filters}
 \fi
 
+%----------------------------------------------------------------------------------------
 \chapter{Modello astronomico}
+%----------------------------------------------------------------------------------------
+
+In questo capitolo si presentano le formule e i modelli teorici che governano le osservazioni di corpi celesti e il tracciamento del loro moto. Si delinea un sistema dinamico altamente non lineare, che dimostra la necessità di tecniche e algoritmi avanzati per lo studio di un caso d'uso reale.
 
 \section{Coordinate celesti}
 
-Le osservazioni astrometriche fanno uso di una coppia di angoli $(\alpha,\delta)$ per identificare la posizione dei corpi nella sfera celeste, o, più precisamente, per identificare la direzione orientata dall'osservatore verso la posizione apparente del corpo considerato. I due angoli sono definiti con riferimento al piano equatoriale e al punto vernale dell'epoca J2000.0 (mezzogiorno del 1° gennaio 2000, calendario gregoriano e tempo terrestre). Nella pratica si considerano assi orientati secondo il sistema ICRS, adottato dalla International Astronomical Union dal 1° gennaio 1998, spostando l'origine dal baricentro del sistema solare alla posizione dell'osservatore (osservazione topocentrica). In questo contesto, l'ascensione retta $\alpha\in[0,2\pi)$ rappresenta la rotazione attorno all'asse z, mentre la declinazione $\delta\in\left[-\frac{\pi}{2},\frac{\pi}{2}\right]$ rappresenta la distanza angolare dal piano xy. Dunque, indicando con $\Delta$ la distanza apparente tra l'osservatore e il corpo al momento dell'osservazione, la posizione apparente del corpo osservato, in coordinate cartesiane topocentriche, è data da:
+Le osservazioni astrometriche fanno uso di una coppia di angoli $(\alpha,\delta)$ per identificare la posizione dei corpi nella sfera celeste, o, più precisamente, per identificare la direzione orientata dall'osservatore verso la posizione apparente del corpo considerato. I due angoli sono definiti con riferimento al piano equatoriale e al punto vernale dell'epoca J2000.0 (mezzogiorno del 1° gennaio 2000, calendario gregoriano e tempo terrestre). Nella pratica si considerano assi orientati secondo il sistema ICRS, adottato dalla International Astronomical Union dal 1° gennaio 1998, spostando l'origine dal baricentro del sistema solare alla posizione dell'osservatore (osservazione topocentrica). In questo contesto, l'ascensione retta $\alpha\in[0,2\pi)$ rappresenta la rotazione attorno all'asse z, mentre la declinazione $\delta\in\left[-\frac{\pi}{2},\frac{\pi}{2}\right]$ rappresenta la distanza angolare dal piano xy. \pagebreak
+
+Dunque, indicando con $\Delta$ la distanza apparente tra l'osservatore e il corpo al momento dell'osservazione, la posizione apparente del corpo osservato, in coordinate cartesiane topocentriche, è data da:
 \begin{equation}\label{eq:radec2pos}
 \begin{pmatrix} x \\ y \\ z \end{pmatrix}=R_z(\alpha)\,R_y(-\delta)\begin{pmatrix} \Delta \\ 0 \\ 0 \end{pmatrix}=\begin{pmatrix} \Delta\cos(\delta)\cos(\alpha) \\ \Delta\cos(\delta)\sin(\alpha) \\ \Delta\sin(\delta) \end{pmatrix}
 \end{equation}
-La conversione a coordinate baricentriche richiede semplicemente di sommare la posizione dell'osservatore rispetto al baricentro del sistema solare.
-\pagebreak
+La conversione a coordinate baricentriche richiede semplicemente di sommare la posizione dell'osservatore rispetto al baricentro del sistema solare. \\
 
 Si definiscono le distanze apparenti $R$ tra l'osservatore e il Sole al momento dell'osservazione e $d$ (solitamente indicata con $r$, ma da non confondersi con la distanza dal fuoco occupato dell'orbita) tra il corpo osservato e il Sole nel momento in cui la luce osservata viene riflessa sulla superficie del corpo. Si definiscono gli angoli di separazione $\theta\in[0,\pi]$, detta elongazione, tra il corpo e il Sole come appaiono all'osservatore al momento dell'osservazione e $\phi\in[0,\pi]$, detto angolo di fase, tra l'osservatore e il Sole come appaiono dal corpo nel momento in cui la luce osservata viene riflessa. Seppure si tratti di una definizione analoga, l'angolo di fase viene definito, in genere, come l'angolo tra la luce incidente e la luce riflessa verso l'osservatore, per via del suo impatto sul modello ottico descritto nella sezione \ref{sec:photometry}. \\
 
@@ -520,7 +536,7 @@ Con questa semplificazione diventa possibile considerare il triangolo tra il cor
 
 \section{Fotometria e il sistema H-G}\label{sec:photometry}
 
-L'intensità della luce osservata è espressa dalla magnitudine apparente e può essere utilizzata per stimare la distanza del corpo. Intuitivamente, questa quantità dipende dall'angolo di fase ($\phi\approx0$ indica un corpo perfettamente illuminato, mentre $\phi\approx1$ comporta che non venga riflessa luce verso l'osservatore), dalle distanze $d$ e $\Delta$ e da alcune caratteristiche fisiche del corpo. Tuttavia non esiste un modello macroscopico esatto.
+Nello studio degli asteroidi, l'intensità della luce osservata è espressa dalla magnitudine apparente e può essere utilizzata per stimare la distanza del corpo. Intuitivamente, questa quantità dipende dall'angolo di fase ($\phi\approx0$ indica un corpo perfettamente illuminato, mentre $\phi\approx1$ comporta che non venga riflessa luce verso l'osservatore), dalle distanze $d$ e $\Delta$ e da alcune caratteristiche fisiche del corpo. Tuttavia non esiste un modello macroscopico esatto.
 
 Una delle prime applicazioni delle nozioni di fotometria allo studio degli asteroidi ha prodotto il modello H-G~\cite{bowell1989}~\cite{dymock2007}, usato tuttora quando non si dispone di informazioni sufficienti per impiegare modelli più precisi. Gli asteroidi vengono caratterizzati da due parametri: $H$, detta magnitudine assoluta, che equivale alla magnitudine apparente per $d=\Delta=1~\mathrm{AU}$ e $\phi=0$\quad e $G$, detto \textit{slope parameter}, che quantifica un picco di luminosità che spesso si verifica nella curva di fase vicino all'opposizione. Se si esprimono le distanze in unità astronomiche, la magnitudine apparente è descritta da:
 \begin{gather}
@@ -530,7 +546,9 @@ V=H+5\log_{10}(d\Delta)-2.5\log_{10}(\Phi(\phi))\label{eq:hg-mag} \\
 
 \section{Orbite ellittiche}
 
-Il moto dei pianeti, degli asteroidi e delle comete è ben approssimato da orbite ellittiche, con un fuoco occupato dal baricentro del sistema solare. Tali orbite possono essere caratterizzate tramite i parametri orbitali kepleriani:
+Il moto dei pianeti, degli asteroidi e delle comete è ben approssimato da orbite ellittiche, con un fuoco occupato dal baricentro del sistema solare. \pagebreak
+
+Tali orbite possono essere caratterizzate tramite i parametri orbitali kepleriani:
 \begin{itemize}
 \item il semiasse maggiore $a$;
 \item l'eccentricità $e$, dove $e=0$ indica un orbita circolare, mentre $e\to 1$ descrive un'orbita progressivamente più schiacciata;
@@ -567,29 +585,17 @@ Infine, la distanza radiale è legata all'anomalia eccentrica da:
 r=a(1-e\cos(E))
 \end{equation}
 
-\chapter{Applicazione a dati reali}
+%----------------------------------------------------------------------------------------
+\chapter{Contributo}
+%----------------------------------------------------------------------------------------
 
-Il Minor Planet Center raccoglie dati su osservazioni ottiche astrometriche di corpi minori, comete e satelliti naturali, effettuate da osservatori in tutto il mondo. I dati sono forniti senza alcun tipo di correzione, come specificato nelle linee guida (\url{https://minorplanetcenter.net/iau/info/Astrometry.html#corrs}). Questo li rende difficili da utilizzare direttamente. In effetti, si comincerà considerando un approccio ``naïve'', procedendo poi con l'applicazione del filtro di Kalman ed evidenziando la precisione aggiuntiva ottenuta.
+TODO
 
-\section{Formato dei dati}
+\section{Approccio diretto}
 
-Moduli Python esistenti come \lstinline{astroquery} consentono di richiedere automaticamente le osservazioni; tuttavia si possono scaricare archivi più completi direttamente dalla piattaforma web \url{https://www.minorplanetcenter.net/db_search}.
+Prima ancora di considerare strategie di filtraggio o di tracciamento del moto orbitale, si potrebbe pensare di risalire a una posizione direttamente dai dati osservati. In effetti, se si conoscesse la distanza del corpo $\Delta$, la si potrebbe sfruttare, insieme agli angoli $\alpha,\delta$, nella formula~\ref{eq:radec2pos}. Tuttavia, risalire a $\Delta$ dalla magnitudine visuale $V$ richiede particolare attenzione.
 
-Questi archivi sono file di testo in classico stile Fortran a 80 colonne e seguono il formato descritto alla pagina \url{https://www.minorplanetcenter.net/iau/info/OpticalObs.html}. In particolare, contengono le seguenti informazioni di nostro interesse:
-\begin{itemize}
-% \item il metodo di osservazione utilizzato (fotografico, CCD, CMOS, ...)
-\item l'ascensione retta, espressa come angolo orario, minuti e secondi
-\item la declinazione, espressa in gradi, minuti e secondi
-\item la magnitudine osservata
-\item la banda utilizzata, ossia un'indicazione della fascia di frequenze elettromagnetiche considerate
-\item il codice dell'osservatorio
-\end{itemize}
-Il file \lstinline{parse.py} si occupa dell'interpretazione dei dati e della trasformazione in oggetti \lstinline{MinorPlanetObservation}. Questo passaggio richiede la conversione degli angoli in radianti e della magnitudine osservata in magnitudine visuale. In effetti, i modelli fotometrici si basano sulla magnitudine relativa alla luce visibile, per cui può essere necessario utilizzare la tabella di conversione fornita alla pagina \url{https://www.minorplanetcenter.net/iau/info/BandConversion.txt}. \\
-Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore.
-
-\section{Approccio naïve}
-
-Se si conosce la distanza del corpo $\Delta$, diventa possibile determinarne la posizione dagli angoli $\alpha,\delta$ tramite la formula~\ref{eq:radec2pos}. Dunque si vuole risalire a $\Delta$ dalla magnitudine visuale $V$, idealmente sfruttando la formula~\ref{eq:hg-mag}. Tuttavia non si dispone della distanza dal Sole $d$ e dell'angolo di fase $\phi$. Una possibile soluzione prevede di risolvere in $\phi$ la seguente equazione tramite metodi numerici:
+Idealmente, si vorrebbe sfruttare direttamente la formula~\ref{eq:hg-mag}, ma non si dispone della distanza dal Sole $d$ e dell'angolo di fase $\phi$. Una possibile soluzione prevede di risolvere in $\phi$ la seguente equazione tramite metodi numerici:
 \begin{equation}
 R^2\sin(\theta)\sin(\theta+\phi)-10^{0.2(V-H)}\sin^2(\phi)\sqrt{\Phi(\phi)}=0
 \end{equation}
@@ -604,18 +610,36 @@ Utilizzando le equazioni~\ref{eq:sinelaw-d} e \ref{eq:sinelaw-delta}, si trova c
 d\Delta=\dfrac{R^2\sin(\theta)\sin(\theta+\phi)}{\sin^2(\phi)}
 \end{equation*}
 Sostituendo e moltiplicando entrambi i lati per $\sin^2(\phi)$ si ottiene l'espressione desiderata. Si osservi che per $\phi=0$ e $\phi=\pi$ sarebbe impossibile effettuare osservazioni valide, per cui si può assumere $\sin(\phi)\neq0$. Lo stesso vale per l'elongazione $\theta$. \\
-Il vantaggio di questa specifica formulazione sta nel fatto che l'espressione ha valore positivo finito per $\phi=0$, ovvero $R^2\sin^2(\theta)$, e ha valore negativo finito per $\phi\to\pi$, ovvero $-R^2\sin^2(\theta)$, il che permette di utilizzare il metodo di Brent nell'intervallo $[0,\pi]$. \\
+Il vantaggio di questa specifica scrittura sta nel fatto che l'espressione ha valore positivo finito per $\phi=0$, ovvero $R^2\sin^2(\theta)$, e ha valore negativo finito per $\phi\to\pi$, ovvero $-R^2\sin^2(\theta)$, il che permette di utilizzare il metodo di Brent nell'intervallo $[0,\pi]$. \\
 Una volta determinata una radice, la distanza è data da:
 \begin{equation}
 \Delta=\dfrac{R\sin(\theta+\phi)}{\sin(\phi)}
 \end{equation}
-% TODO: più radici?
-% TODO: mostrare il codice che implementa
-% TODO: theta e R da efemeridi
+Si osservi che in generale può esistere più di una radice, specie se l'elongazione $\theta$ è piccola; tuttavia questo non si verifica nei dataset considerati. \\
+In ogni caso, questo processo è estremamente sensibile all'errore sui dati iniziali e la magnitudine risulta essere una misura piuttosto imprecisa. Tutto ciò evidenzia ulteriormente la necessità di strategie più sofisticate. \\
+Questo approccio iniziale resta comunque un utile punto di riferimento e verrà utilizzato per quantificare l'efficacia del filtro di Kalman in questo contesto.
+
+Per il calcolo di $R$ e $\theta$ si può sfruttare un servizio di effemeridi. In questo caso si è utilizzato il servizio JPL, sia attraverso la funzione \lstinline{astropy.coordinates.solar_system.get_body_barycentric}, che dalla piattaforma web \url{https://ssd.jpl.nasa.gov/horizons/app.html}. \\
+Indicando con $\hat{R}$ il versore dall'osservatore verso il sole e con $\hat{\Delta}$ il versore dall'osservatore verso il corpo, l'elongazione è data da:
+\begin{equation}
+\theta=\arccos\left(\hat{\Delta}\cdot\hat{R}\right)
+\end{equation}
+Con $\hat{\Delta}$ dato da:
+\begin{equation}
+\hat{\Delta}=\begin{pmatrix}
+\cos(\delta)\cos(\alpha) \\
+\cos(\delta)\sin(\alpha) \\
+\sin(\delta)
+\end{pmatrix}
+\end{equation} \\
+
+% TODO: mostrare il codice che implementa?
+
+Si procede ora con l'impostazione del problema sotto forma di sistema dinamico, come richiesto dal filtro di Kalman.
 
 \section{Sfide sul tracciamento di angoli}
 
-Per via della natura del problema, si vuole memorizzare quantità angolari sia nel vettore di stato che nel vettore di misurazione. Tuttavia, fare ciò senza dovuti accorgimenti introdurrebbe forti discontinuità nelle equazioni che descrivono il sistema. Si noti, ad esempio, che all'avanzare dell'anomalia, questa passa da $\nu\approx2\pi$ a $\nu\approx0$. In aggiunta, una stima $\hat{\nu}\approx2\pi$ affiancata ad una misurazione $\nu\approx0$ è nella realtà da considerarsi valida, ma dal punto di vista del filtro apparirebbe come una grossa discrepanza.
+Per via della natura del problema, si vuole memorizzare quantità angolari sia nel vettore di stato che nel vettore di misurazione. Tuttavia, fare ciò senza dovuti accorgimenti introdurrebbe forti discontinuità nelle equazioni che descrivono il sistema. Si noti, ad esempio, che all'avanzare dell'anomalia, questa passa da $\nu\approx2\pi$ a $\nu\approx0$. In aggiunta, una stima $\hat{\nu}\approx2\pi$ affiancata ad una misurazione $\nu\approx0$ è in realtà da considerarsi valida, ma dal punto di vista del filtro apparirebbe come una grossa discrepanza.
 
 Per affrontare questo problema, si decide di non memorizzare direttamente gli angoli, ma bensì di rappresentarli nelle loro componenti sulla circonferenza unitaria, ossia la coppia $\bigl(cos(\cdot),sin(\cdot)\bigr)$. Questo approccio è analogo alla rappresentazione di rotazioni in tre dimensioni attraverso l'uso di quaternioni e permette di rimuovere le discontinuità di cui si è parlato.
 
@@ -659,6 +683,38 @@ H \\
 G
 \end{pmatrix}
 \end{equation}
+
+TODO
+
+\section{Equazioni del sistema}
+
+TODO
+
+\section{Matrici di covarianza}
+
+TODO
+
+\section{Simulazione}
+
+TODO
+
+\section{Applicazione a dati reali}
+
+Il Minor Planet Center raccoglie dati su osservazioni ottiche astrometriche di corpi minori, comete e satelliti naturali, effettuate da osservatori in tutto il mondo. I dati sono forniti senza alcun tipo di correzione, come specificato nelle linee guida (\url{https://minorplanetcenter.net/iau/info/Astrometry.html#corrs}).
+
+Moduli Python esistenti come \lstinline{astroquery} consentono di richiedere automaticamente le osservazioni; tuttavia si possono scaricare archivi più completi direttamente dalla piattaforma web \url{https://www.minorplanetcenter.net/db_search}.
+
+Questi archivi sono file di testo in classico stile Fortran a 80 colonne e seguono il formato descritto alla pagina \url{https://www.minorplanetcenter.net/iau/info/OpticalObs.html}. In particolare, contengono le seguenti informazioni di nostro interesse:
+\begin{itemize}
+% \item il metodo di osservazione utilizzato (fotografico, CCD, CMOS, ...)
+\item l'ascensione retta, espressa come angolo orario, minuti e secondi
+\item la declinazione, espressa in gradi, minuti e secondi
+\item la magnitudine osservata
+\item la banda utilizzata, ossia un'indicazione della fascia di frequenze elettromagnetiche considerate
+\item il codice dell'osservatorio
+\end{itemize}
+Il file \lstinline{parse.py} si occupa dell'interpretazione dei dati e della trasformazione in oggetti \lstinline{MinorPlanetObservation}. Questo passaggio richiede la conversione degli angoli in radianti e della magnitudine osservata in magnitudine visuale. In effetti, i modelli fotometrici si basano sulla magnitudine relativa alla luce visibile, per cui può essere necessario utilizzare la tabella di conversione fornita alla pagina \url{https://www.minorplanetcenter.net/iau/info/BandConversion.txt}. \\
+Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore.
 
 \iffalse % Template chapter
 \chapter{Contribution}
