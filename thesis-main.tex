@@ -512,7 +512,7 @@ Nel 1960, Kálmán pubblicò la descrizione del filtro a tempo discreto~\cite{10
 \chapter{Modello astronomico}
 %----------------------------------------------------------------------------------------
 
-In questo capitolo si presentano le formule e i modelli teorici che governano le osservazioni di corpi celesti e il tracciamento del loro moto. Si delinea un sistema dinamico altamente non lineare, che dimostra la necessità di tecniche e algoritmi avanzati per lo studio di un caso d'uso reale.
+In questo capitolo si presentano le formule e i modelli teorici che governano le osservazioni di corpi celesti e il tracciamento del loro moto. Si delinea un sistema dinamico altamente non lineare, che dimostra la necessità di tecniche e algoritmi avanzati per lo studio di questo caso d'uso reale.
 
 \section{Coordinate celesti}
 
@@ -558,12 +558,12 @@ Tali orbite possono essere caratterizzate tramite i parametri orbitali keplerian
 \end{itemize}
 La posizione del corpo nell'orbita è identificata dall'anomalia. Più precisamente, la distanza angolare dal periapside è detta anomalia vera e indicata con $\nu$. \\
 Si definisce la distanza radiale $r$ dal fuoco occupato e l'argomento di latitudine $u=\omega+\nu$, cosicché le coordinate cartesiane del corpo siano date da:
-\begin{equation}
+\begin{equation}\label{eq:orbit2pos}
 \begin{pmatrix}x \\ y \\ z\end{pmatrix}=R_z(\Omega)R_x(i)R_z(u)\begin{pmatrix}r \\ 0 \\ 0\end{pmatrix}=\begin{pmatrix}r\bigl(\cos(\Omega)\cos(u)-\sin(\Omega)\sin(u)\cos(i)\bigr) \\ r\bigl(\sin(\Omega)\cos(u)+\cos(\Omega)\sin(u)\cos(i)\bigr) \\ r\sin(u)\sin(i)\end{pmatrix}
 \end{equation}
 Per studiare l'evoluzione della posizione nel tempo si introducono i concetti di anomalia media $M$ e anomalia eccentrica $E$. \\
 La prima avanza linearmente nel tempo in base al moto medio $n$ e al tempo di periapside $\tau$:
-\begin{equation}
+\begin{equation}\label{eq:advance-mean-anomaly}
 M=n(t-\tau)
 \end{equation}
 Il moto medio è definito dal periodo dell'orbita come $n=\frac{2\pi}{T}$ ed è ricavabile dal semiasse maggiore e dal parametro gravitazionale $\mu=GM$ del corpo primario (in questo caso $G$ è la costante di gravitazione universale e $M$ è la massa del corpo primario):
@@ -571,17 +571,17 @@ Il moto medio è definito dal periodo dell'orbita come $n=\frac{2\pi}{T}$ ed è 
 n=\sqrt{\frac{\mu}{a^3}}
 \end{equation}
 Una volta determinata l'anomalia media, si risale all'anomalia eccentrica esprimendo gli angoli in radianti e risolvendo l'equazione di Keplero tramite metodi numerici:
-\begin{equation}
+\begin{equation}\label{eq:mean2ecc}
 M=E-e\sin(E)
 \end{equation}
 In questo caso si è scelto di utilizzare il metodo di Newton, ponendo $f(x)=x-e\sin(x)-M$, $f^\prime(x)=1-e\cos(x)$ e $x_0=M$. \\
 Dall'anomalia eccentrica è possibile passare all'anomalia vera. Una formula numericamente stabile richiede di calcolare il valore intermedio $\beta$:
 \begin{gather}
 \beta=\frac{e}{1+\sqrt{1-e^2}} \\
-\nu=E+2\arctan\left(\frac{\beta\sin(E)}{1-\beta\cos(E)}\right)
+\nu=E+2\arctan\left(\frac{\beta\sin(E)}{1-\beta\cos(E)}\right)\label{eq:ecc2true}
 \end{gather}
 Infine, la distanza radiale è legata all'anomalia eccentrica da:
-\begin{equation}
+\begin{equation}\label{eq:ecc2dist}
 r=a(1-e\cos(E))
 \end{equation}
 
@@ -637,7 +637,7 @@ Con $\hat{\Delta}$ dato da:
 
 Si procede ora con l'impostazione del problema sotto forma di sistema dinamico, come richiesto dal filtro di Kalman.
 
-\section{Sfide sul tracciamento di angoli}
+\section{Sfide sul tracciamento di angoli}\label{sec:angle-challenges}
 
 Per via della natura del problema, si vuole memorizzare quantità angolari sia nel vettore di stato che nel vettore di misurazione. Tuttavia, fare ciò senza dovuti accorgimenti introdurrebbe forti discontinuità nelle equazioni che descrivono il sistema. Si noti, ad esempio, che all'avanzare dell'anomalia, questa passa da $\nu\approx2\pi$ a $\nu\approx0$. In aggiunta, una stima $\hat{\nu}\approx2\pi$ affiancata ad una misurazione $\nu\approx0$ è in realtà da considerarsi valida, ma dal punto di vista del filtro apparirebbe come una grossa discrepanza.
 
@@ -657,17 +657,15 @@ Tuttavia restano delle limitazioni, dovute al fatto che questa trasformazione è
 
 \section{Scelta dei vettori di stato e di misurazione}
 
+Un passo fondamentale è la scelta delle quantità da considerare nel vettore di stato. I parametri orbitali $a,e,i,\Omega,\omega$ sono pressoché costanti, ma averne stime accurate nel tempo può essere vantaggioso, per cui si sceglie di tracciarli. Questo apre anche la possibilità di partire con stime grossolane e lasciare al filtro il compito di determinare i valori più probabili. \\
+Il moto medio $n$ può sempre essere determinato dal semiasse maggiore, ma un approccio che consenta piccole variazioni dovute a fattori esterni può produrre risultati migliori. \\
+I parametri $H$ e $G$ sono costanti, ma soggetti ad incertezza, per cui si cerca di trovare stime più accurate. \\
+
+La decisione più complessa riguarda la posizione del corpo. L'obiettivo finale è tracciarne la posizione cartesiana, per cui un'opzione naturale sarebbe quella di aggiungere al vettore le componenti $x,y,z$. Tuttavia, per questa tesi si è scelto di tracciare l'anomalia media $M$ e, solo in un secondo momento, risalire alla posizione cartesiana. Questo permette di avere una legge di evoluzione molto più semplice e numericamente stabile. Sarebbe comunque consigliabile uno studio approfondito per mettere a confronto le diverse alternative. \\
+
+In conclusione, esprimendo le quantità angolari nelle loro componenti, come descritto nella sezione~\ref{sec:angle-challenges}, il vettore di stato diventa:
 \begin{equation}
-z=\begin{pmatrix}
-\cos(\alpha) \\
-\sin(\alpha) \\
-\cos(\delta) \\
-\sin(\delta) \\
-V
-\end{pmatrix}
-\end{equation}
-\begin{equation}
-x=\begin{pmatrix}
+x=\left(\begin{smallmatrix}
 \cos(M) \\
 \sin(M) \\
 a \\
@@ -681,14 +679,44 @@ e \\
 n \\
 H \\
 G
-\end{pmatrix}
-\end{equation}
+\end{smallmatrix}\right)
+\end{equation} \pagebreak
 
-TODO
+La scelta del vettore di misurazione è più diretta, poiché le quantità misurate sono $\alpha$, $\delta$ e $V$:
+\begin{equation}
+z=\left(\begin{smallmatrix}
+\cos(\alpha) \\
+\sin(\alpha) \\
+\cos(\delta) \\
+\sin(\delta) \\
+V
+\end{smallmatrix}\right)
+\end{equation}
 
 \section{Equazioni del sistema}
 
-TODO
+La legge di evoluzione $f$ agisce esclusivamente sull'anomalia media, secondo la formula~\ref{eq:advance-mean-anomaly}:
+\begin{gather*}
+x_{k-1}=\begin{pmatrix}
+\cos(M_{k-1}) \\
+\sin(M_{k-1}) \\
+... \\
+n \\
+...
+\end{pmatrix}
+\quad\rightarrow\quad
+M_{k-1}=\arctan\left(\frac{\sin(M_{k-1})}{\cos(M_{k-1})}\right) \\
+\rightarrow\quad
+M_k=M_{k-1}+n(t_k-t_{k-1})
+\quad\rightarrow\quad
+x_k=\begin{pmatrix}
+\cos(M_k) \\
+\sin(M_k) \\
+...
+\end{pmatrix}
+\end{gather*}
+
+La trasformazione di uscita, invece, prevede una fase iniziale di calcolo della posizione cartesiana, per poi passare alla posizione topocentrica e ai valori osservati. Dall'anomalia media passa all'anomalia eccentrica, secondo la formula~\ref{eq:mean2ecc}, poi dall'anomalia eccentrica all'anomalia vera, secondo la formula~\ref{eq:ecc2true}, e alla distanza radiale $r$, secondo la formula~\ref{eq:ecc2dist}. Dunque, la posizione è data dalla formula~\ref{eq:orbit2pos}.
 
 \section{Matrici di covarianza}
 
@@ -715,6 +743,8 @@ Questi archivi sono file di testo in classico stile Fortran a 80 colonne e seguo
 \end{itemize}
 Il file \lstinline{parse.py} si occupa dell'interpretazione dei dati e della trasformazione in oggetti \lstinline{MinorPlanetObservation}. Questo passaggio richiede la conversione degli angoli in radianti e della magnitudine osservata in magnitudine visuale. In effetti, i modelli fotometrici si basano sulla magnitudine relativa alla luce visibile, per cui può essere necessario utilizzare la tabella di conversione fornita alla pagina \url{https://www.minorplanetcenter.net/iau/info/BandConversion.txt}. \\
 Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore.
+
+% TODO: ricorda i crediti per i dataset usati!!!
 
 \iffalse % Template chapter
 \chapter{Contribution}
