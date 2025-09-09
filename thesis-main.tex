@@ -410,7 +410,7 @@ Dunque, viene applicata la trasformazione non lineare, per determinare la stima 
 \hat{x}_k^-=\sum_{i=0}^{2n}W^{(\text{mean},i)}\mathbf{x}_k^{(i)} \\
 P_k^-=\sum_{i=0}^{2n}W^{(\text{cov},i)}\left(\mathbf{x}_k^{(i)}-\hat{x}_k^-\right)\left(\mathbf{x}_k^{(i)}-\hat{x}_k^-\right)^T
 \end{gather*}
-Similmente, nella fase di correzione viene applicata la trasformazione $h$ per trovare una previsione della misurazione $\hat{z}_k^-$ (si mantiene la notazione all'apice per indicare che il calcolo viene effettuato prima della misurazione, seppure non sia necessario migliorare successivamente questa stima). Ne viene poi calcolata sia la autocovarianza che la covarianza incrociata con la stima \textit{a priori}:
+Similmente, nella fase di correzione viene applicata la trasformazione $h$ per trovare una previsione della misurazione $\hat{z}_k^-$ (si mantiene la notazione all'apice per indicare che il calcolo viene effettuato prima della misurazione, seppure non sia necessario migliorare successivamente questa stima). Ne viene poi calcolata sia la auto-covarianza che la covarianza incrociata con la stima \textit{a priori}:
 \begin{gather*}
 \mathbf{z}_k^{(i)}=h(k,\mathbf{x}_{k-1}^{(i)})\quad\forall\,i=0,...,2n \\
 \hat{z}_k^-=\sum_{i=0}^{2n}W^{(\text{mean},i)}\mathbf{z}_k^{(i)} \\
@@ -421,7 +421,7 @@ A questo punto, la matrice dei guadagni di Kalman viene calcolata come:
 \begin{equation*}
 \mathcal{K}_k=\mathrm{Cov}(\hat{x}_k^-,\hat{z}_k^-)\mathrm{Cov}(\hat{z}_k^-,\hat{z}_k^-)^{-1}
 \end{equation*}
-Infine, la stima \textit{a posteriori} e la relativa autocovarianza sono date da:
+Infine, la stima \textit{a posteriori} e la relativa auto-covarianza sono date da:
 \begin{gather*}
 \hat{x}_k=\hat{x}_k^-+\mathcal{K}_k(z_k-\hat{z}_k^-) \\
 P_k=P_k^--\mathcal{K}_k\mathrm{Cov}(\hat{z}_k^-,\hat{z}_k^-)\mathcal{K}_k^T
@@ -731,7 +731,50 @@ Infine, la magnitudine visuale $V$ è data dalla formula~\ref{eq:hg-mag}, utiliz
 
 \section{Matrici di covarianza}
 
-TODO
+La precisione del filtro di Kalman dipende fortemente dall'accuratezza delle matrici di covarianza $Q$ e $R$ utilizzate. Ovviamente non se ne conoscono i valori reali, ma analisi sia formali che statistiche possono fornire stime pressoché ottimali. \\
+Per modelli semplici, $Q$ ed $R$ sono spesso matrici diagonali, ma non è questo il caso per il sistema considerato. In effetti, se si considera una generica quantità angolare $\theta$ con distribuzione di von Mises avente valore medio $\mu$ e parametro di concentrazione $\kappa$, approssimata da una distribuzione normale lungo la retta tangente avente varianza $\sigma^2=\frac{1}{\kappa}$, si trova che la coppia $\bigl(\cos(\theta),\sin(\theta)\bigr)$ ha la seguente matrice di auto-covarianza:
+\begin{equation}
+\begin{pmatrix}
+\sigma^2\sin^2(\mu) & -\sigma^2\sin(\mu)\cos(\mu) \\
+-\sigma^2\sin(\mu)\cos(\mu) & \sigma^2\cos^2(\mu)
+\end{pmatrix}
+\end{equation}
+
+Dunque, in prima approssimazione, $Q$ è data da (prosegue):
+\begin{equation}
+Q=\left(\begin{smallmatrix}
+\sigma_M^2\sin^2(M) & -\sigma_M^2\sin(M)\cos(M) & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+-\sigma_M^2\sin(M)\cos(M) & \sigma_M^2\cos^2(M) & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & \sigma_a^2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & \sigma_e^2 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & \sigma_i^2\sin^2(i) & -\sigma_i^2\sin(i)\cos(i) & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & -\sigma_i^2\sin(i)\cos(i) & \sigma_i^2\cos^2(i) & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots
+\end{smallmatrix}\right)
+\end{equation}
+\begin{equation}
+Q=\left(\begin{smallmatrix}
+\vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+0 & 0 & 0 & 0 & 0 & 0 & \sigma_\Omega^2\sin^2(\Omega) & -\sigma_\Omega^2\sin(\Omega)\cos(\Omega) & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & -\sigma_\Omega^2\sin(\Omega)\cos(\Omega) & \sigma_\Omega^2\cos^2(\Omega) & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \sigma_\omega^2\sin^2(\omega) & -\sigma_\omega^2\sin(\omega)\cos(\omega) & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & -\sigma_\omega^2\sin(\omega)\cos(\omega) & \sigma_\omega^2\cos^2(\omega) & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \sigma_n^2 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \sigma_H^2 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & \sigma_G^2
+\end{smallmatrix}\right)
+\end{equation}
+
+La matrice $R$ richiede ulteriori passaggi. Se si considera il versore di osservazione $\hat{\Delta}$ con distribuzione di Fisher avente parametro di concentrazione $\kappa_{\alpha,\delta}$, allora gli angoli $\alpha$ e $\delta$ sono approssimati da distribuzioni di von Mises con parametri di concentrazione $\kappa_{\alpha,\delta}\cos^2(\delta)$ e $\kappa_{\alpha,\delta}$ rispettivamente. Dunque, in prima approssimazione, $R$ è data da:
+\begin{equation}
+R=\left(\begin{smallmatrix}
+\sigma_{\alpha,\delta}^2\tfrac{\sin^2(\alpha)}{\cos^2(\delta)} & -\sigma_{\alpha,\delta}^2\tfrac{\sin(\alpha)\cos(\alpha)}{\cos^2(\delta)} & 0 & 0 & 0 \\
+-\sigma_{\alpha,\delta}^2\tfrac{\sin(\alpha)\cos(\alpha)}{\cos^2(\delta)} & \sigma_{\alpha,\delta}^2\tfrac{\cos^2(\alpha)}{\cos^2(\delta)} & 0 & 0 & 0 \\
+0 & 0 & \sigma_{\alpha,\delta}^2\sin^2(\delta) & -\sigma_{\alpha,\delta}^2\sin(\delta)\cos(\delta) & 0 \\
+0 & 0 & -\sigma_{\alpha,\delta}^2\sin(\delta)\cos(\delta) & \sigma_{\alpha,\delta}^2\cos^2(\delta) & 0 \\
+0 & 0 & 0 & 0 & \sigma_V^2
+\end{smallmatrix}\right)
+\end{equation}
 
 \section{Simulazione}
 
