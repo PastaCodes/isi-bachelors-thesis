@@ -524,14 +524,15 @@ Dunque, indicando con $\Delta$ la distanza apparente tra l'osservatore e il corp
 \end{equation}
 La conversione a coordinate baricentriche richiede semplicemente di sommare la posizione dell'osservatore rispetto al baricentro del sistema solare. \\
 
-Si definiscono le distanze apparenti $R$ tra l'osservatore e il Sole al momento dell'osservazione e $d$ (solitamente indicata con $r$, ma da non confondersi con la distanza dal fuoco occupato dell'orbita) tra il corpo osservato e il Sole nel momento in cui la luce osservata viene riflessa sulla superficie del corpo. Si definiscono gli angoli di separazione $\theta\in[0,\pi]$, detta elongazione, tra il corpo e il Sole come appaiono all'osservatore al momento dell'osservazione e $\phi\in[0,\pi]$, detto angolo di fase, tra l'osservatore e il Sole come appaiono dal corpo nel momento in cui la luce osservata viene riflessa. Seppure si tratti di una definizione analoga, l'angolo di fase viene definito, in genere, come l'angolo tra la luce incidente e la luce riflessa verso l'osservatore, per via del suo impatto sul modello ottico descritto nella sezione \ref{sec:photometry}. \\
+Si definiscono le distanze apparenti $R$ tra l'osservatore e il Sole al momento dell'osservazione e $d$ (solitamente indicata con $r$, ma da non confondersi con la distanza dal fuoco occupato dell'orbita) tra il corpo osservato e il Sole nel momento in cui la luce osservata viene riflessa sulla superficie del corpo. Si definiscono gli angoli di separazione $\theta\in[0,\pi]$, detta elongazione, tra il corpo e il Sole come appaiono all'osservatore al momento dell'osservazione e $\phi\in[0,\pi]$, detto angolo di fase, tra l'osservatore e il Sole come appaiono dal corpo nel momento in cui la luce osservata viene riflessa. Seppure si tratti di una definizione analoga, l'angolo di fase viene definito, in genere, come l'angolo tra la luce incidente e la luce riflessa verso l'osservatore, per via del suo impatto sul modello ottico descritto nella sezione~\ref{sec:photometry}. \\
 
 Si è parlato finora di quantità apparenti. Questa precisazione è necessaria per via della velocità finita della luce e ad altri fenomeni come aberrazioni, rifrazioni ed effetti relativistici. Da questo punto in poi si considereranno le quantità apparenti come coincidenti alle controparti ``reali'' (geometriche), con la consapevolezza che ciò introdurrà imprecisioni nel modello, le quali dovranno essere considerate nell'applicazione del filtro di Kalman. Queste imprecisioni sono accettabili per il tracciamento di asteroidi, ma possono diventare problematiche per oggetti più veloci.
 
-Con questa semplificazione diventa possibile considerare il triangolo tra il corpo osservato, l'osservatore e il Sole e applicare il teorema dei seni per determinare relazioni fra gli angoli e le distanze. In particolare:
+Con questa semplificazione diventa possibile considerare il triangolo tra il corpo osservato, l'osservatore e il Sole e applicare il teorema dei seni e il teorema dei coseni per determinare relazioni fra gli angoli e le distanze. In particolare:
 \begin{gather}
-\frac{d}{\sin(\theta)}=\frac{R}{\sin(\phi)}\label{eq:sinelaw-d} \\
-\frac{\Delta}{\sin(\pi-\theta-\phi)}=\frac{R}{\sin(\phi)}\Rightarrow\frac{\Delta}{\sin(\theta+\phi)}=\frac{R}{\sin(\phi)}\label{eq:sinelaw-delta}
+\frac{d}{\sin(\theta)}=\frac{R}{\sin(\phi)}\label{eq:sinelaw-d} \\[0.5em]
+\frac{\Delta}{\sin(\pi-\theta-\phi)}=\frac{R}{\sin(\phi)}\quad\Rightarrow\quad\frac{\Delta}{\sin(\theta+\phi)}=\frac{R}{\sin(\phi)}\label{eq:sinelaw-delta} \\[0.5em]
+r^2+\Delta^2-2r\Delta\cos(\phi)=R^2\quad\Rightarrow\quad\phi=\arccos\left(\frac{r^2+\Delta^2-R^2}{2r\Delta}\right)\label{eq:cosinelaw-phi}
 \end{gather}
 
 \section{Fotometria e il sistema H-G}\label{sec:photometry}
@@ -619,13 +620,13 @@ Si osservi che in generale può esistere più di una radice, specie se l'elongaz
 In ogni caso, questo processo è estremamente sensibile all'errore sui dati iniziali e la magnitudine risulta essere una misura piuttosto imprecisa. Tutto ciò evidenzia ulteriormente la necessità di strategie più sofisticate. \\
 Questo approccio iniziale resta comunque un utile punto di riferimento e verrà utilizzato per quantificare l'efficacia del filtro di Kalman in questo contesto.
 
-Per il calcolo di $R$ e $\theta$ si può sfruttare un servizio di effemeridi. In questo caso si è utilizzato il servizio JPL, sia attraverso la funzione \lstinline{astropy.coordinates.solar_system.get_body_barycentric}, che dalla piattaforma web \url{https://ssd.jpl.nasa.gov/horizons/app.html}. \\
+Per il calcolo di $R$ e $\theta$ si può sfruttare un servizio di effemeridi che fornisca le posizioni dell'osservatore e del Sole. In questo caso si è utilizzato il servizio JPL, sia attraverso le funzioni \lstinline{astropy.coordinates.solar_system.get_body_barycentric} e \lstinline{astropy.coordinates.earth.EarthLocation.get_gcrs_posvel}, che dalla piattaforma web \url{https://ssd.jpl.nasa.gov/horizons/app.html}. \\
 Indicando con $\hat{R}$ il versore dall'osservatore verso il sole e con $\hat{\Delta}$ il versore dall'osservatore verso il corpo, l'elongazione è data da:
 \begin{equation}
 \theta=\arccos\left(\hat{\Delta}\cdot\hat{R}\right)
 \end{equation}
 Con $\hat{\Delta}$ dato da:
-\begin{equation}
+\begin{equation}\label{eq:radec2dir}
 \hat{\Delta}=\begin{pmatrix}
 \cos(\delta)\cos(\alpha) \\
 \cos(\delta)\sin(\alpha) \\
@@ -716,7 +717,17 @@ x_k=\begin{pmatrix}
 \end{pmatrix}
 \end{gather*}
 
-La trasformazione di uscita, invece, prevede una fase iniziale di calcolo della posizione cartesiana, per poi passare alla posizione topocentrica e ai valori osservati. Dall'anomalia media passa all'anomalia eccentrica, secondo la formula~\ref{eq:mean2ecc}, poi dall'anomalia eccentrica all'anomalia vera, secondo la formula~\ref{eq:ecc2true}, e alla distanza radiale $r$, secondo la formula~\ref{eq:ecc2dist}. Dunque, la posizione è data dalla formula~\ref{eq:orbit2pos}.
+La trasformazione di uscita $h$, invece, prevede una fase iniziale di calcolo della posizione cartesiana. Dall'anomalia media si passa all'anomalia eccentrica, secondo la formula~\ref{eq:mean2ecc}, poi dall'anomalia eccentrica all'anomalia vera, secondo la formula~\ref{eq:ecc2true}, e alla distanza radiale $r$, secondo la formula~\ref{eq:ecc2dist}. Dunque, la posizione è data dalla formula~\ref{eq:orbit2pos}.
+
+Successivamente, dalla posizione baricentrica si ottiene la posizione topocentrica e si determinano i valori osservati. Anche in questo caso si fa uso di un servizio di effemeridi. Trovato $\hat{\Delta}$ come vettore normalizzato della posizione topocentrica e $\Delta$ come il suo modulo, si sfrutta l'inverso della formula~\ref{eq:radec2dir}:
+\begin{gather}
+\sin(\delta)=z \\
+\cos(\delta)=\sqrt{1-\sin^2(\delta)} \\
+\cos(\alpha)=\frac{x}{\cos(\delta)} \\
+\sin(\alpha)=\frac{y}{\cos(\delta)}
+\end{gather}
+
+Infine, la magnitudine visuale $V$ è data dalla formula~\ref{eq:hg-mag}, utilizzando l'angolo di fase ricavato dalla formula~\ref{eq:cosinelaw-phi}.
 
 \section{Matrici di covarianza}
 
