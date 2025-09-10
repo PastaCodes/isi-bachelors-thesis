@@ -67,7 +67,7 @@ Optional. Max a few lines.
 %----------------------------------------------------------------------------------------
 \tableofcontents   
 \listoffigures     % (optional) comment if empty
-\lstlistoflistings % (optional) comment if empty
+% \lstlistoflistings % (optional) comment if empty
 %----------------------------------------------------------------------------------------
 
 \mainmatter
@@ -170,7 +170,7 @@ Infine, nelle formulazioni standard del filtro, si richiede che $w$ e $v$ siano 
 
 \section{Costruzione del filtro lineare}
 
-Nella letteratura sono riportate diverse derivazioni e dimostrazioni di ottimalità del filtro di Kalman~\cite[pp.~107-113]{10.5555/2823801}~\cite{10.48550/arXiv.1910.03558}. Si presenta qui una costruzione algebrica il più elementare possibile. \\
+In letteratura sono riportate diverse derivazioni e dimostrazioni di ottimalità del filtro di Kalman~\cite[pp.~107-113]{10.5555/2823801}~\cite{10.48550/arXiv.1910.03558}. Si presenta qui una costruzione algebrica il più elementare possibile. \\
 
 Il primo passo è descrivere l'espressione che calcoli la stima $\hat{x}_k$. Al passo $k\geq 1$ sono disponibili le informazioni riguardo $\hat{x}_{k-1}$, $u_{k-1}$ e $z_k$, per cui l'espressione lineare avrà la forma generica:
 \begin{equation} \label{eq:generic-estimate}
@@ -590,7 +590,7 @@ r=a(1-e\cos(E))
 \chapter{Contributo}
 %----------------------------------------------------------------------------------------
 
-TODO
+In questo capitolo si illustra come sono state messe in pratica le nozioni teoriche in modo da sperimentare concretamente l'utilizzo del filtro di Kalman, come sono state adattate le formule astronomiche per ottenere le equazioni del sistema, come sono state ricavate le matrici di covarianza e le sfide affrontate durante il percorso. Si presentano, infine, i risultati ottenuti dapprima su dati simulati e successivamente su dati reali.
 
 \section{Approccio diretto}\label{sec:naive}
 
@@ -632,7 +632,7 @@ Con $\hat{\Delta}$ dato da:
 \cos(\delta)\sin(\alpha) \\
 \sin(\delta)
 \end{pmatrix}
-\end{equation} \\
+\end{equation}
 
 % TODO: mostrare il codice che implementa?
 
@@ -783,7 +783,17 @@ Inizialmente si è scelto di verificare l'efficacia del filtro utilizzando dati 
 Dalle posizioni dei tre soggetti, si determinano, poi, i valori osservati. Gli angoli $\alpha,\delta$ sono ottenuti dalla direzione $\hat{\Delta}$, dopo che essa è stata perturbata secondo una distribuzione di Fisher (\lstinline{scipy.stats.vonmises_fisher}). La magnitudine visuale $V$ è ricavata dall'angolo di fase, a sua volta ricavato trigonometricamente, e perturbata secondo una distribuzione normale (\lstinline{numpy.random.normal}). \\
 Ovviamente questa simulazione non modellizza la velocità finita della luce. \\
 
-Una volta ottenute le osservazioni, separate da un lasso di tempo variabile, si crea un'istanza di UKF con $\alpha=10^{-3},\beta=2,\kappa=0$ e vengono fornite la legge di evoluzione $f$ e la trasformazione di uscita $h$ ricavate nella sezione~\ref{sec:real-system-eqs} e le matrici di covarianza $R$ e $Q$ della sezione~\ref{sec:real-system-covs}. Le stime sono poi confrontate con le posizioni ottenute dall'approccio diretto discusso nella sezione~\ref{sec:naive}.
+Una volta ottenute le osservazioni, separate da un lasso di tempo variabile, si crea un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$ e vengono fornite la legge di evoluzione $f$ e la trasformazione di uscita $h$ ricavate nella sezione~\ref{sec:real-system-eqs} e le matrici di covarianza $R$ e $Q$ della sezione~\ref{sec:real-system-covs}. Le stime sono poi confrontate con le posizioni ottenute dall'approccio diretto discusso nella sezione~\ref{sec:naive}. \\
+
+In figura~\ref{fig:sim20} si riportano i risultati sui primi 20 passi di simulazione, con una rappresentazione 3D delle posizioni e un grafico di andamento dell'errore, calcolato come $\left\Vert\left(\begin{smallmatrix}\hat{x}\\\hat{y}\\\hat{z}\end{smallmatrix}\right)-\left(\begin{smallmatrix}x\\y\\z\end{smallmatrix}\right)\right\Vert$. Si evidenzia una graduale convergenza.
+
+\begin{figure}
+    \includegraphics[width=0.55\linewidth]{figures/simulation_20_3d.png}
+    \includegraphics[width=0.45\linewidth]{figures/simulation_20_error.png}
+    \caption{Visualizzazione delle stime sui dati simulati (primi 20 passi), confrontate con l'approccio diretto.}
+    \label{fig:sim20}
+    \vspace{2\baselineskip}
+\end{figure}
 
 \section{Applicazione a dati reali}
 
@@ -801,7 +811,21 @@ Questi archivi sono file di testo in classico stile Fortran a 80 colonne e seguo
 \item il codice dell'osservatorio
 \end{itemize}
 Il file \lstinline{parse.py} si occupa dell'interpretazione dei dati e della trasformazione in oggetti \lstinline{MinorPlanetObservation}. Questo passaggio richiede la conversione degli angoli in radianti e della magnitudine osservata in magnitudine visuale. In effetti, i modelli fotometrici si basano sulla magnitudine relativa alla luce visibile, per cui può essere necessario utilizzare la tabella di conversione fornita alla pagina \url{https://www.minorplanetcenter.net/iau/info/BandConversion.txt}. \\
-Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore.
+Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore. Anche in questo caso, un servizio di effemeridi può essere utilizzato per risalire alla posizione baricentrica dell'osservatore in un determinato istante date le coordinate geodetiche. \pagebreak
+
+Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$. In figura~\ref{fig:Bennu130} si riportano i risultati sulle prime 130 osservazioni. Anche in questo caso si osserva una generale convergenza, seppur decisamente più lenta rispetto alla simulazione. Inoltre, si è osservato che il processo non risulta perfettamente stabile; su altre porzioni di dati, lievi discostamenti improvvisi portano a rapida divergenza. Tutto ciò potrebbe essere dovuto a diversi motivi, possibilmente legati a problemi di stabilità numerica, per cui studi ulteriori sono necessari. In ogni caso, si è mostrato come il filtro permetta di ottenere risultati dalle 10 alle 100 volte più accurati rispetto all'approccio diretto, nonostante le diverse semplificazioni che sono state fatte, dando prova concreta dell'utilità del filtro di Kalman in un contesto reale.
+
+\begin{figure}
+    \includegraphics[width=0.55\linewidth]{figures/Bennu_130_3d.png}
+    \includegraphics[width=0.45\linewidth]{figures/Bennu_130_error.png}
+    \caption{Visualizzazione delle stime sui dati reali dell'asteroide Bennu (prime 130 osservazioni), confrontate con l'approccio diretto.}
+    \label{fig:Bennu130}
+    \vspace{2\baselineskip}
+\end{figure}
+
+\chapter{Conclusioni}
+
+TODO
 
 % TODO: ricorda i crediti per i dataset usati!!!
 
@@ -827,8 +851,10 @@ You may also put some code snippet (which is NOT float by default), eg: \cref{ls
 \bibliographystyle{ieeetr}
 \bibliography{bibliography}
 
+\iffalse
 \begin{acknowledgements} % this is optional
 Optional. Max 1 page.
 \end{acknowledgements}
+\fi
 
 \end{document}
