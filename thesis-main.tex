@@ -545,7 +545,7 @@ V=H+5\log_{10}(d\Delta)-2.5\log_{10}(\Phi(\phi))\label{eq:hg-mag} \\
 \Phi(\phi)=(1-G)\exp\left(-3.33\bigl(\tan\left(\tfrac{\phi}{2}\right)\bigr)^{0.63}\right)+G\exp\left(-1.87\bigl(\tan\left(\tfrac{\phi}{2}\right)\bigr)^{1.22}\right)
 \end{gather}
 
-\section{Orbite ellittiche}
+\section{Orbite ellittiche}\label{sec:orbits}
 
 Il moto dei pianeti, degli asteroidi e delle comete è ben approssimato da orbite ellittiche, con un fuoco occupato dal baricentro del sistema solare. \pagebreak
 
@@ -592,7 +592,7 @@ r=a(1-e\cos(E))
 
 TODO
 
-\section{Approccio diretto}
+\section{Approccio diretto}\label{sec:naive}
 
 Prima ancora di considerare strategie di filtraggio o di tracciamento del moto orbitale, si potrebbe pensare di risalire a una posizione direttamente dai dati osservati. In effetti, se si conoscesse la distanza del corpo $\Delta$, la si potrebbe sfruttare, insieme agli angoli $\alpha,\delta$, nella formula~\ref{eq:radec2pos}. Tuttavia, risalire a $\Delta$ dalla magnitudine visuale $V$ richiede particolare attenzione.
 
@@ -620,7 +620,7 @@ Si osservi che in generale può esistere più di una radice, specie se l'elongaz
 In ogni caso, questo processo è estremamente sensibile all'errore sui dati iniziali e la magnitudine risulta essere una misura piuttosto imprecisa. Tutto ciò evidenzia ulteriormente la necessità di strategie più sofisticate. \\
 Questo approccio iniziale resta comunque un utile punto di riferimento e verrà utilizzato per quantificare l'efficacia del filtro di Kalman in questo contesto.
 
-Per il calcolo di $R$ e $\theta$ si può sfruttare un servizio di effemeridi che fornisca le posizioni dell'osservatore e del Sole. In questo caso si è utilizzato il servizio JPL, sia attraverso le funzioni \lstinline{astropy.coordinates.solar_system.get_body_barycentric} e \lstinline{astropy.coordinates.earth.EarthLocation.get_gcrs_posvel}, che dalla piattaforma web \url{https://ssd.jpl.nasa.gov/horizons/app.html}. \\
+Per il calcolo di $R$ e $\theta$ si può sfruttare un servizio di effemeridi che fornisca le posizioni dell'osservatore e del Sole. In questo caso si è utilizzato il servizio JPL, sia attraverso le funzioni \lstinline{astropy.coordinates.get_body_barycentric} e \lstinline{astropy.coordinates.EarthLocation.get_gcrs_posvel}, che dalla piattaforma web \url{https://ssd.jpl.nasa.gov/horizons/app.html}. \\
 Indicando con $\hat{R}$ il versore dall'osservatore verso il sole e con $\hat{\Delta}$ il versore dall'osservatore verso il corpo, l'elongazione è data da:
 \begin{equation}
 \theta=\arccos\left(\hat{\Delta}\cdot\hat{R}\right)
@@ -694,7 +694,7 @@ V
 \end{smallmatrix}\right)
 \end{equation}
 
-\section{Equazioni del sistema}
+\section{Equazioni del sistema}\label{sec:real-system-eqs}
 
 La legge di evoluzione $f$ agisce esclusivamente sull'anomalia media, secondo la formula~\ref{eq:advance-mean-anomaly}:
 \begin{gather*}
@@ -729,7 +729,7 @@ Successivamente, dalla posizione baricentrica si ottiene la posizione topocentri
 
 Infine, la magnitudine visuale $V$ è data dalla formula~\ref{eq:hg-mag}, utilizzando l'angolo di fase ricavato dalla formula~\ref{eq:cosinelaw-phi}.
 
-\section{Matrici di covarianza}
+\section{Matrici di covarianza}\label{sec:real-system-covs}
 
 La precisione del filtro di Kalman dipende fortemente dall'accuratezza delle matrici di covarianza $Q$ e $R$ utilizzate. Ovviamente non se ne conoscono i valori reali, ma analisi sia formali che statistiche possono fornire stime pressoché ottimali. \\
 Per modelli semplici, $Q$ ed $R$ sono spesso matrici diagonali, ma non è questo il caso per il sistema considerato. In effetti, se si considera una generica quantità angolare $\theta$ con distribuzione di von Mises avente valore medio $\mu$ e parametro di concentrazione $\kappa$, approssimata da una distribuzione normale lungo la retta tangente avente varianza $\sigma^2=\frac{1}{\kappa}$, si trova che la coppia $\bigl(\cos(\theta),\sin(\theta)\bigr)$ ha la seguente matrice di auto-covarianza:
@@ -778,7 +778,12 @@ R=\left(\begin{smallmatrix}
 
 \section{Simulazione}
 
-TODO
+Inizialmente si è scelto di verificare l'efficacia del filtro utilizzando dati simulati. In primo luogo, il file \lstinline{simulation/ideal_model_test.py} si occupa di simulare il moto orbitale, sia del corpo osservato, che del Sole e dell'osservatore, secondo le formule descritte nella sezione~\ref{sec:orbits}. Per garantire dati realistici, sono stati usati parametri orbitali reali, seppur successivamente considerati costanti, ottenuti dalla piattaforma JPL Horizons, in particolare accurati all'epoca J2000.0 tempo dinamico baricentrico. Per il corpo osservato si è considerato Bennu (1999 RQ36) e per l'osservatore si è considerato il baricentro Terra-Luna, garantendo sufficiente diversificazione nei dati.
+
+Dalle posizioni dei tre soggetti, si determinano, poi, i valori osservati. Gli angoli $\alpha,\delta$ sono ottenuti dalla direzione $\hat{\Delta}$, dopo che essa è stata perturbata secondo una distribuzione di Fisher (\lstinline{scipy.stats.vonmises_fisher}). La magnitudine visuale $V$ è ricavata dall'angolo di fase, a sua volta ricavato trigonometricamente, e perturbata secondo una distribuzione normale (\lstinline{numpy.random.normal}). \\
+Ovviamente questa simulazione non modellizza la velocità finita della luce. \\
+
+Una volta ottenute le osservazioni, separate da un lasso di tempo variabile, si crea un'istanza di UKF con $\alpha=10^{-3},\beta=2,\kappa=0$ e vengono fornite la legge di evoluzione $f$ e la trasformazione di uscita $h$ ricavate nella sezione~\ref{sec:real-system-eqs} e le matrici di covarianza $R$ e $Q$ della sezione~\ref{sec:real-system-covs}. Le stime sono poi confrontate con le posizioni ottenute dall'approccio diretto discusso nella sezione~\ref{sec:naive}.
 
 \section{Applicazione a dati reali}
 
