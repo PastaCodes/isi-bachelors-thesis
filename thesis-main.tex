@@ -66,7 +66,7 @@ Optional. Max a few lines.
 
 %----------------------------------------------------------------------------------------
 \tableofcontents   
-\listoffigures     % (optional) comment if empty
+% \listoffigures     % (optional) comment if empty
 % \lstlistoflistings % (optional) comment if empty
 %----------------------------------------------------------------------------------------
 
@@ -836,7 +836,7 @@ Questi archivi sono file di testo in classico stile Fortran a 80 colonne e seguo
 Il file \lstinline{parse.py} si occupa dell'interpretazione dei dati e della trasformazione in oggetti \lstinline{MinorPlanetObservation}. Questo passaggio richiede la conversione degli angoli in radianti e della magnitudine osservata in magnitudine visuale. In effetti, i modelli fotometrici si basano sulla magnitudine relativa alla luce visibile, per cui può essere necessario utilizzare la tabella di conversione fornita alla pagina \url{https://www.minorplanetcenter.net/iau/info/BandConversion.txt}. \\
 Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore. Anche in questo caso, un servizio di effemeridi può essere utilizzato per risalire alla posizione baricentrica dell'osservatore in un determinato istante date le coordinate geodetiche. \pagebreak
 
-Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$. In figura~\ref{fig:Bennu130} si riportano i risultati sulle prime 130 osservazioni. Anche in questo caso si osserva una generale convergenza, seppur decisamente più lenta rispetto alla simulazione. Inoltre, si è osservato che il processo non risulta perfettamente stabile; su altre porzioni di dati, lievi discostamenti improvvisi portano a rapida divergenza. Tutto ciò potrebbe essere dovuto a diversi motivi, possibilmente legati a problemi di stabilità numerica, per cui studi ulteriori sono necessari. In ogni caso, si è mostrato come il filtro permetta di ottenere risultati dalle 10 alle 100 volte più accurati rispetto all'approccio diretto, nonostante le diverse semplificazioni che sono state fatte, dando prova concreta dell'utilità del filtro di Kalman in un contesto reale.
+Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$. In figura~\ref{fig:Bennu130} si riportano i risultati sulle prime 130 osservazioni. Anche in questo caso si osserva una generale convergenza, seppur decisamente più lenta rispetto alla simulazione. Inoltre, si è osservato che il processo non risulta perfettamente stabile; su altre porzioni di dati, lievi discostamenti improvvisi portano a rapida divergenza. Tutto ciò potrebbe essere dovuto a diversi motivi, possibilmente legati a problemi di stabilità numerica, per cui studi ulteriori sono necessari. In ogni caso, si è mostrato come il filtro permetta di ottenere risultati dalle 10 alle 100 volte più accurati rispetto all'approccio diretto, nonostante le diverse semplificazioni che sono state fatte, dando prova concreta dell'utilità del filtro di Kalman in questo contesto reale.
 
 \begin{figure}
     \includegraphics[width=0.55\linewidth]{figures/Bennu_130_3d.png}
@@ -848,7 +848,20 @@ Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3
 
 \chapter{Conclusioni}
 
-TODO
+Il progetto ha consentito di sviluppare una conoscenza approfondita delle varianti più importanti del filtro, sia dal punto di vista del loro utilizzo, sia con riferimento ai passaggi intermedi di cui si occupano le implementazioni e che normalmente sono nascosti all'utente. Questo ha permesso di rifinire le funzioni e i parametri forniti per ottenere risultati soddisfacenti.
+
+Il processo di simulazione ha contribuito a una migliore comprensione del modello astronomico, così da poter superare le sfide nell'applicazione ai dati reali. È stata anche un'occasione per ricercare le distribuzioni di von Mises e di Fisher, fondamentali nella statistica direzionale. Allo stesso modo, l'utilizzo del metodo di Brent per il calcolo degli zeri ha ampliato il catalogo costituito durante gli studi. In generale, si è fatto ampio uso delle librerie \lstinline{numpy} e \lstinline{scipy}, importanti per la computazione efficiente e l'analisi dei dati.
+
+In termini di risultati, si è confermata la possibilità di tracciare il movimento di un corpo celeste in modo accurato, con stime dalle 10 alle 100 volte più precise rispetto al solo utilizzo delle osservazioni.
+
+\paragraph{Possibili approfondimenti}
+
+\begin{itemize}
+\item Mettere a confronto le varie possibilità riguardo i vettori di stato e di misurazione, ad esempio considerare le componenti cartesiane $x,y,z$ piuttosto che l'anomalia media;
+\item Trovare approssimazioni migliori delle matrici di covarianza $Q$ ed $R$;
+\item Esaminare attentamente le caratteristiche dei dati che portano alla divergenza;
+\item Espandere il modello del sistema per considerare la velocità finita della luce e altri fenomeni connessi.
+\end{itemize}
 
 \iffalse % Template chapter
 \chapter{Contribution}
