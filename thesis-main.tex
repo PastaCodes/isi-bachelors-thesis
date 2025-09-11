@@ -848,7 +848,7 @@ Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3
 
 \chapter{Conclusioni}
 
-Il progetto ha consentito di sviluppare una conoscenza approfondita delle varianti più importanti del filtro, sia dal punto di vista del loro utilizzo, sia con riferimento ai passaggi intermedi di cui si occupano le implementazioni e che normalmente sono nascosti all'utente. Questo ha permesso di rifinire le funzioni e i parametri forniti per ottenere risultati soddisfacenti.
+Il progetto ha consentito di sviluppare una conoscenza approfondita delle varianti più importanti del filtro, sia dal punto di vista del loro utilizzo, sia con riferimento ai passaggi intermedi di cui si occupano le implementazioni e che normalmente sono ``nascosti'' all'utente. Questo ha permesso di rifinire le funzioni e i parametri forniti per ottenere risultati soddisfacenti.
 
 Il processo di simulazione ha contribuito a una migliore comprensione del modello astronomico, così da poter superare le sfide nell'applicazione ai dati reali. È stata anche un'occasione per ricercare le distribuzioni di von Mises e di Fisher, fondamentali nella statistica direzionale. Allo stesso modo, l'utilizzo del metodo di Brent per il calcolo degli zeri ha ampliato il catalogo costituito durante gli studi. In generale, si è fatto ampio uso delle librerie \lstinline{numpy} e \lstinline{scipy}, importanti per la computazione efficiente e l'analisi dei dati.
 
@@ -859,7 +859,7 @@ In termini di risultati, si è confermata la possibilità di tracciare il movime
 \begin{itemize}
 \item Mettere a confronto le varie possibilità riguardo i vettori di stato e di misurazione, ad esempio considerare le componenti cartesiane $x,y,z$ piuttosto che l'anomalia media.
 \item Trovare approssimazioni migliori delle matrici di covarianza $Q$ ed $R$.
-\item Esaminare attentamente le caratteristiche dei dati che portano alla divergenza.
+\item Esaminare attentamente le caratteristiche delle porzioni di dati che portano alla divergenza.
 \item Espandere il modello del sistema per considerare la velocità finita della luce e altri fenomeni connessi.
 \end{itemize}
 
