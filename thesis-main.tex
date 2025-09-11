@@ -33,7 +33,7 @@ Damiana Lazzaro
 %\morecosupervisor{Dott. CoSupervisor 2}
 \session{
 %I
-II % TODO: verificare
+II
 }
 \academicyear{
 %2022-2023
@@ -55,7 +55,7 @@ II % TODO: verificare
 
 \begin{abstract}	
 % Max 2000 characters, strict.
-TODO
+Il filtro di Kalman è un algoritmo estremamente importante per l'elaborazione di dati. In questa tesi se ne studiano le origini matematiche e se ne sperimenta concretamente l'utilizzo, implementando un algoritmo innovativo di tracciamento di corpi celesti nel sistema solare a partire da osservazioni ottiche sia simulate che reali. Si ottengono risultati decisamente più accurati rispetto alle sole osservazioni.
 \end{abstract}
 
 \iffalse
@@ -77,7 +77,15 @@ Optional. Max a few lines.
 \label{chap:introduction}
 %----------------------------------------------------------------------------------------
 
-TODO
+Ogni volta che si effettua una misurazione della realtà, il valore ottenuto è soggetto ad imprecisione. Questo vale per i sensori più semplici, ma anche per gli strumenti scientifici più sofisticati. Da che esiste questo problema, esiste il desiderio di ottenere dati più accurati a partire dai dati misurati, attraverso un processo di ``filtraggio''.
+
+Non è difficile immaginare che maggiore è la conoscenza delle leggi che governano l'evoluzione di un sistema, maggiore potrà essere l'accuratezza dei risultati, man mano che si raccolgono misurazioni. Questa intuizione è stata formalizzata da Rudolf Emil Kálmán e Richard Snowden Bucy nell'algoritmo oggi conosciuto come filtro di Kalman. Nonostante siano passati più di 60 anni, il filtraggio dei dati resta un processo cruciale nell'ingegneria applicata e la soluzione di Kálmán e Bucy resta alla base di molte tecniche attuali.
+
+Il modello matematico diventa di interesse informatico nel momento in cui viene implementato nel codice e deve essere utilizzato in modo numericamente stabile. L'interesse di questa tesi è, dunque, individuare un caso di applicazione reale che consenta di sperimentare concretamente l'utilizzo del filtro, con risvolti utili nella ricerca, in questo caso nel settore astronomico.
+
+Si è scelto di tracciare la posizione di corpi celesti nel sistema solare, con particolare attenzione ai NEA (near-Earth asteroids), a partire da osservazioni ottiche effettuate da osservatòri in tutto il mondo e raccolte dal Minor Planet Center. Questo studio richiede una buona conoscenza dei modelli del moto orbitale dei corpi e dei fenomeni ottici che ne influenzano la luminosità, ma consente di avere stime accurate della posizione tridimensionale, che possono rivelarsi utili per analisi successive di pericolosità per il pianeta Terra.
+
+Il modello si scoprirà essere altamente non lineare, richiedendo l'utilizzo della variante UKF (Unscented Kalman Filter), più complessa rispetto alla formulazione originale. Inoltre, si rivelerà necessario risolvere equazioni numericamente, aprendo la possibilità di mettere in atto i metodi studiati per il calcolo degli zeri di una funzione, nonché di apprenderne di nuovi.
 
 \iffalse
 Write your intro here.
@@ -99,7 +107,22 @@ you may need both \ac{vm} and \acp{vm}.
 
 \paragraph{Struttura della tesi}
 
-TODO
+\begin{itemize}
+\item Definizione formale di sistema dinamico e del problema risolto dal filtro di Kalman;
+\item Costruzione algebrica, raccogliendo in modo più chiaro possibile i passaggi che portano alle formule finali;
+\item Esplorazione delle varianti non lineari, con i relativi pregi e difetti, includendo alcune delle innovazioni più recenti;
+\item Presentazione del modello astronomico, ossia l'insieme delle formule di astrometria e astrodinamica che governano i fenomeni del caso di applicazione studiato, da cui si ricaveranno le equazioni del sistema nella forma richiesta dal filtro, insieme alle matrici e i parametri necessari;
+\item Discussione dell'implementazione di una simulazione del sistema e dei risultati ottenuti da essa, con successivo passaggio ai dati forniti dalle osservazioni reali e confronto;
+\item Infine, valutazione del vantaggio in termini di precisione portato dal processo di filtraggio, rispetto a un approccio diretto per il calcolo delle posizioni.
+\end{itemize}
+
+\iffalse % Opt for a list instead
+Si inizierà definendo formalmente il concetto di sistema dinamico e il problema risolto dal filtro di Kalman. Si presenterà una costruzione algebrica, raccoglieranno in modo più chiaro possibile i passaggi che portano alle formule finali. Si esploreranno le varianti non lineari, con i relativi pregi e difetti, includendo alcune delle innovazioni più recenti.
+
+Si passerà poi alla presentazione del modello astronomico, ossia l'insieme delle formule di astrometria e astrodinamica che governano i fenomeni del caso di applicazione studiato. Da queste si ricaveranno le equazioni del sistema nella forma richiesta dal filtro, insieme alle matrici e i parametri necessari.
+
+Si discuterà come è stata implementata la simulazione del sistema e i risultati ottenuti da essa. Si passerà poi ai dati forniti dalle osservazioni reali e si confronterà l'accuratezza con la simulazione. Infine, si valuterà il vantaggio in termini di precisione portato dal processo di filtraggio, rispetto a un approccio diretto di calcolo delle posizioni.
+\fi
 
 % \note{At the end, describe the structure of the paper}
 
@@ -516,7 +539,7 @@ In questo capitolo si presentano le formule e i modelli teorici che governano le
 
 \section{Coordinate celesti}
 
-Le osservazioni astrometriche fanno uso di una coppia di angoli $(\alpha,\delta)$ per identificare la posizione dei corpi nella sfera celeste, o, più precisamente, per identificare la direzione orientata dall'osservatore verso la posizione apparente del corpo considerato. I due angoli sono definiti con riferimento al piano equatoriale e al punto vernale dell'epoca J2000.0 (mezzogiorno del 1° gennaio 2000, calendario gregoriano e tempo terrestre). Nella pratica si considerano assi orientati secondo il sistema ICRS, adottato dalla International Astronomical Union dal 1° gennaio 1998, spostando l'origine dal baricentro del sistema solare alla posizione dell'osservatore (osservazione topocentrica). In questo contesto, l'ascensione retta $\alpha\in[0,2\pi)$ rappresenta la rotazione attorno all'asse z, mentre la declinazione $\delta\in\left[-\frac{\pi}{2},\frac{\pi}{2}\right]$ rappresenta la distanza angolare dal piano xy. \pagebreak
+Le osservazioni astrometriche fanno uso di una coppia di angoli $(\alpha,\delta)$ per identificare la posizione dei corpi nella sfera celeste, o, più precisamente, per identificare la direzione orientata dall'osservatore verso la posizione apparente del corpo considerato. I due angoli sono definiti con riferimento al piano equatoriale e al punto vernale dell'epoca J2000.0 (mezzogiorno del 1° gennaio 2000, calendario gregoriano e tempo terrestre). Nella pratica si considerano assi orientati secondo il sistema ICRS, adottato dall'Unione Astronomica Internazionale dal 1° gennaio 1998, spostando l'origine dal baricentro del sistema solare alla posizione dell'osservatore (osservazione topocentrica). In questo contesto, l'ascensione retta $\alpha\in[0,2\pi)$ rappresenta la rotazione attorno all'asse z, mentre la declinazione $\delta\in\left[-\frac{\pi}{2},\frac{\pi}{2}\right]$ rappresenta la distanza angolare dal piano xy. \pagebreak
 
 Dunque, indicando con $\Delta$ la distanza apparente tra l'osservatore e il corpo al momento dell'osservazione, la posizione apparente del corpo osservato, in coordinate cartesiane topocentriche, è data da:
 \begin{equation}\label{eq:radec2pos}
@@ -827,8 +850,6 @@ Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3
 
 TODO
 
-% TODO: ricorda i crediti per i dataset usati!!!
-
 \iffalse % Template chapter
 \chapter{Contribution}
 
@@ -851,10 +872,9 @@ You may also put some code snippet (which is NOT float by default), eg: \cref{ls
 \bibliographystyle{ieeetr}
 \bibliography{bibliography}
 
-\iffalse
 \begin{acknowledgements} % this is optional
-Optional. Max 1 page.
+Questa ricerca si è avvalsa di dati e servizi forniti dal Minor Planet Center dell'Unione Astronomica Internazionale, nonché dal Jet Propulsion Laboratory del California Institute of Technology. \\\null\\
+Il software è stato sviluppato utilizzando le librerie Python \lstinline{fortranformat},\\ \lstinline{matplotlib}, \lstinline{numpy}, \lstinline{scipy}, \lstinline{scipy-stubs}, \lstinline{astropy}, \lstinline{jplephem}, \lstinline{certifi}, \lstinline{requests}, \lstinline{filterpy}.
 \end{acknowledgements}
-\fi
 
 \end{document}
