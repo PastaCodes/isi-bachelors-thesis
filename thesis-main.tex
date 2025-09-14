@@ -7,6 +7,7 @@
 \usepackage{acronym}
 \usepackage{amsmath}
 \usepackage{mathtools}
+\usepackage{tikz-cd}
 
 \school{\unibo}
 \programme{Corso di Laurea
@@ -73,8 +74,7 @@ Optional. Max a few lines.
 \mainmatter
 
 %----------------------------------------------------------------------------------------
-\chapter{Introduzione}
-\label{chap:introduction}
+\chapterWithoutNumber{Introduzione}\label{chap:introduction}
 %----------------------------------------------------------------------------------------
 
 Ogni volta che si effettua una misurazione della realtà, il valore ottenuto è soggetto ad imprecisione. Questo vale per i sensori più semplici, ma anche per gli strumenti scientifici più sofisticati. Da che esiste questo problema, esiste il desiderio di ottenere dati più accurati a partire dai dati misurati, attraverso un processo di ``filtraggio''.
@@ -83,7 +83,7 @@ Non è difficile immaginare che maggiore è la conoscenza delle leggi che govern
 
 Il modello matematico diventa di interesse informatico nel momento in cui viene implementato nel codice e deve essere utilizzato in modo numericamente stabile. L'interesse di questa tesi è, dunque, individuare un caso di applicazione reale che consenta di sperimentare concretamente l'utilizzo del filtro, con risvolti utili nella ricerca, in questo caso nel settore astronomico.
 
-Si è scelto di tracciare la posizione di corpi celesti nel sistema solare, con particolare attenzione ai NEA (near-Earth asteroids), a partire da osservazioni ottiche effettuate da osservatòri in tutto il mondo e raccolte dal Minor Planet Center. Questo studio richiede una buona conoscenza dei modelli del moto orbitale dei corpi e dei fenomeni ottici che ne influenzano la luminosità, ma consente di avere stime accurate della posizione tridimensionale, che possono rivelarsi utili per analisi successive di pericolosità per il pianeta Terra.
+Si è scelto di tracciare la posizione di corpi celesti nel sistema solare, con particolare attenzione a NEA (near-Earth asteroids) e PHA (potentially hazardous asteroids), a partire da osservazioni ottiche effettuate da osservatòri in tutto il mondo e raccolte dal Minor Planet Center. Questo studio richiede una buona conoscenza dei modelli del moto orbitale dei corpi e dei fenomeni ottici che ne influenzano la luminosità, ma consente di avere stime accurate della posizione tridimensionale, che possono rivelarsi utili per analisi successive di pericolosità per il pianeta Terra.
 
 Il modello si scoprirà essere altamente non lineare, richiedendo l'utilizzo della variante UKF (Unscented Kalman Filter), più complessa rispetto alla formulazione originale. Inoltre, si rivelerà necessario risolvere equazioni numericamente, aprendo la possibilità di mettere in atto i metodi studiati per il calcolo degli zeri di una funzione, nonché di apprenderne di nuovi.
 
@@ -238,7 +238,15 @@ $$\Rightarrow\mathcal{A}_k=(I-\mathcal{K}_kH_k)A_k\enspace,\quad\mathcal{B}_k=(I
 
 Risulta pratico definire la seguente quantità, per $k\geq 1$, come una stima \textit{a priori}, ossia che non tenga conto della misurazione $z_k$:
 $$\hat{x}_k^-=A_k\hat{x}_{k-1}+B_ku_{k-1}$$
-Così facendo, si vanno a distinguere due fasi all'interno di ogni passo: una fase di predizione, o \textit{time update}, in cui si calcola $\hat{x}_k^-$ in base alle conoscenze sul modello, e una fase di correzione, o \textit{measurement update}, in cui si combina $\hat{x}_k^-$ con la misurazione $z_k$ per ottenere una stima ottimale $\hat{x}_k$. \\
+Così facendo, si vanno a distinguere due fasi all'interno di ogni passo: una fase di predizione, o \textit{time update}, in cui si calcola $\hat{x}_k^-$ in base alle conoscenze sul modello, e una fase di correzione, o \textit{measurement update}, in cui si combina $\hat{x}_k^-$ con la misurazione $z_k$ per ottenere una stima ottimale $\hat{x}_k$.
+\begin{equation*}
+\begin{tikzcd}[row sep=3em, column sep=8em]
+& \hat{x}_1^-\arrow[d, "correzione" description] & \hat{x}_2^-\arrow[d, "correzione" description] & ... \\
+\hat{x}_0\arrow[ur, "predizione" description] & \hat{x}_1\arrow[ur, "predizione" description] & \hat{x}_2\arrow[ur, "predizione" description] &
+\end{tikzcd}
+\end{equation*}
+\vspace{1em}
+
 L'espressione per ricavare $\hat{x}_k$, ossia la stima \textit{a posteriori}, diventa ora:
 $$\hat{x}_k=(I-\mathcal{K}_kH_k)A_k\hat{x}_{k-1}+(I-\mathcal{K}_kH_k)B_ku_{k-1}+\mathcal{K}_kz_k=$$
 $$=(I-\mathcal{K}_kH_k)(A_k\hat{x}_{k-1}+B_ku_{k-1})+\mathcal{K}_kz_k=(I-\mathcal{K}_kH_k)\hat{x}_k^-+\mathcal{K}_kz_k=$$
@@ -250,8 +258,7 @@ $$=A_k(\hat{x}_{k-1}-x_{k-1})-w_{k-1}=A_ke_{k-1}-w_{k-1}$$
 Si osservi che anche $e_k^-$ è privo di \textit{bias}:
 $$\mathbb{E}[e_k^-]=\mathbb{E}[A_ke_{k-1}-w_{k-1}]=A_k\mathbb{E}[e_{k-1}]-E[w_{k-1}]=\underline{0}$$
 
-Si definiscano, per $k\geq 1$, le auto-covarianze degli errori $P_k^-=\mathrm{Cov}(e_k^-,e_k^-)$ e $P_k=\mathrm{Cov}(e_k,e_k)$. \\
-Si ha:
+Si definiscano, per $k\geq 1$, le auto-covarianze degli errori $P_k^-=\mathrm{Cov}(e_k^-,e_k^-)$ e $P_k=\mathrm{Cov}(e_k,e_k)$. Si ha:
 \begin{gather*}
 P_k^-=\mathbb{E}\left[(e_k^--\mathbb{E}[e_k^-])(e_k^--\mathbb{E}[e_k^-])^T\right]=\mathbb{E}\left[e_k^-(e_k^-)^T\right]= \\
 =\mathbb{E}\left[(A_ke_{k-1}-w_{k-1})(A_ke_{k-1}-w_{k-1})^T\right]= \\
@@ -353,8 +360,10 @@ Riassumendo, l'algoritmo si basa sulle seguenti formule:
 \hat{x}_0=\mathbb{E}[x_0] \\
 P_0=\mathrm{Cov}(x_0,x_0) \\[0.2\baselineskip]
 \hline \\[-0.8\baselineskip]
+\textbf{Fase di predizione:} \\
 \hat{x}_k^-=A_k\hat{x}_{k-1}+Bu_{k-1} \\
 P_k^-=A_kP_{k-1}{A_k}^T+Q_{k-1} \\
+\textbf{Fase di correzione:} \\
 \mathcal{K}_k=P_k^-{H_k}^T\left(H_kP_k^-{H_k}^T+R_k\right)^{-1} \\
 \hat{x}_k=\hat{x}_k^-+\mathcal{K}_k(z_k-H_k\hat{x}_k^-) \\
 P_k=\left(I-\mathcal{K}_kH_k\right)P_k^-
@@ -808,7 +817,7 @@ Ovviamente questa simulazione non modellizza la velocità finita della luce. \\
 
 Una volta ottenute le osservazioni, separate da un lasso di tempo variabile, si crea un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$ e vengono fornite la legge di evoluzione $f$ e la trasformazione di uscita $h$ ricavate nella sezione~\ref{sec:real-system-eqs} e le matrici di covarianza $R$ e $Q$ della sezione~\ref{sec:real-system-covs}. Le stime sono poi confrontate con le posizioni ottenute dall'approccio diretto discusso nella sezione~\ref{sec:naive}. \\
 
-In figura~\ref{fig:sim20} si riportano i risultati sui primi 20 passi di simulazione, con una rappresentazione 3D delle posizioni e un grafico di andamento dell'errore, calcolato come $\left\Vert\left(\begin{smallmatrix}\hat{x}\\\hat{y}\\\hat{z}\end{smallmatrix}\right)-\left(\begin{smallmatrix}x\\y\\z\end{smallmatrix}\right)\right\Vert$. Si evidenzia una graduale convergenza.
+In figura~\ref{fig:sim20} si riportano i risultati sui primi 20 passi di simulazione, con una rappresentazione 3D delle posizioni e un grafico di andamento dell'errore, calcolato come $\left\Vert\left(\begin{smallmatrix}\hat{x}\\\hat{y}\\\hat{z}\end{smallmatrix}\right)-\left(\begin{smallmatrix}x\\y\\z\end{smallmatrix}\right)\right\Vert$. Il numero limitato di passi mostrati ha lo scopo di permettere di distinguere i punti dati. Si evidenzia una graduale convergenza.
 
 \begin{figure}
     \includegraphics[width=0.55\linewidth]{figures/simulation_20_3d.png}
@@ -846,7 +855,7 @@ Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3
     \vspace{2\baselineskip}
 \end{figure}
 
-\chapter{Conclusioni}
+\chapterWithoutNumber{Conclusioni}
 
 Il progetto ha consentito di sviluppare una conoscenza approfondita delle varianti più importanti del filtro, sia dal punto di vista del loro utilizzo, sia con riferimento ai passaggi intermedi di cui si occupano le implementazioni e che normalmente sono ``nascosti'' all'utente. Questo ha permesso di rifinire le funzioni e i parametri forniti per ottenere risultati soddisfacenti.
 
