@@ -33,10 +33,7 @@ Damiana Lazzaro
 }
 %\cosupervisor{Dott. CoSupervisor 1}
 %\morecosupervisor{Dott. CoSupervisor 2}
-\session{
-%I
-II
-}
+%\session{I}
 \academicyear{
 %2022-2023
 2024-2025
@@ -78,15 +75,15 @@ Optional. Max a few lines.
 \chapterWithoutNumber{Introduzione}\label{chap:introduction}
 %----------------------------------------------------------------------------------------
 
-Ogni volta che si effettua una misurazione della realtà, il valore ottenuto è soggetto ad imprecisione. Questo vale per i sensori più semplici, ma anche per gli strumenti scientifici più sofisticati. Da che esiste questo problema, esiste il desiderio di ottenere dati più accurati a partire dai dati misurati, attraverso un processo di ``filtraggio''.
+Ogni volta che si effettua una misurazione della realtà, il valore ottenuto è soggetto ad imprecisione. Questo vale per i sensori più semplici, ma anche per gli strumenti scientifici più sofisticati. Fin da quando questo limite è stato riconosciuto, è emersa l'esigenza di ricavare informazioni più accurate a partire dai dati osservati, attraverso un processo di filtraggio.
 
-Non è difficile immaginare che maggiore è la conoscenza delle leggi che governano l'evoluzione di un sistema, maggiore potrà essere l'accuratezza dei risultati, man mano che si raccolgono misurazioni. Questa intuizione è stata formalizzata da Rudolf Emil Kálmán e Richard Snowden Bucy nell'algoritmo oggi conosciuto come filtro di Kalman. Nonostante siano passati più di 60 anni, il filtraggio dei dati resta un processo cruciale nell'ingegneria applicata e la soluzione di Kálmán e Bucy resta alla base di molte tecniche attuali.
+Non è difficile immaginare che una conoscenza più approfondita delle leggi che governano l'evoluzione di un sistema consente di ottenere stime via via più accurate man mano che si raccolgono nuove misurazioni. Questa intuizione è stata formalizzata da Rudolf Emil Kálmán e Richard Snowden Bucy nell'algoritmo oggi conosciuto come filtro di Kalman. Nonostante siano passati più di 60 anni dalla sua introduzione, il filtraggio dei dati resta un processo cruciale nell'ingegneria applicata e la soluzione di Kálmán e Bucy resta alla base di molte tecniche moderne.
 
-Il modello matematico diventa di interesse informatico nel momento in cui viene implementato nel codice e deve essere utilizzato in modo numericamente stabile. L'interesse di questa tesi è, dunque, individuare un caso di applicazione reale che consenta di sperimentare concretamente l'utilizzo del filtro, con risvolti utili nella ricerca, in questo caso nel settore astronomico.
+Il modello matematico assume rilevanza informatica nel momento in cui viene implementato nel codice e deve garantire stabilità numerica durante l'esecuzione. L'obiettivo di questa tesi è, dunque, individuare un caso di applicazione reale che permetta di sperimentare concretamente l'utilizzo del filtro, con ricadute significative per la ricerca, in particolare nel settore astronomico.
 
-Si è scelto di tracciare la posizione di corpi celesti nel sistema solare, con particolare attenzione a NEA (near-Earth asteroids) e PHA (potentially hazardous asteroids), a partire da osservazioni ottiche effettuate da osservatòri in tutto il mondo e raccolte dal Minor Planet Center. Questo studio richiede una buona conoscenza dei modelli del moto orbitale dei corpi e dei fenomeni ottici che ne influenzano la luminosità, ma consente di avere stime accurate della posizione tridimensionale, che possono rivelarsi utili per analisi successive di pericolosità per il pianeta Terra.
+A tal fine, si è scelto di tracciare la posizione di corpi celesti nel sistema solare, con particolare attenzione a NEA (near-Earth asteroids) e PHA (potentially hazardous asteroids), a partire da osservazioni ottiche effettuate da osservatòri in tutto il mondo e raccolte dal Minor Planet Center. Questo studio richiede una buona conoscenza dei modelli del moto orbitale dei corpi e dei fenomeni ottici che ne influenzano la luminosità degli asteroidi, ma consente di ottenere stime accurate della posizione tridimensionale, che possono rivelarsi utili per analisi successive riguardanti la pericolosità potenziale per la Terra.
 
-Il modello si scoprirà essere altamente non lineare, richiedendo l'utilizzo della variante UKF (Unscented Kalman Filter), più complessa rispetto alla formulazione originale. Inoltre, si rivelerà necessario risolvere equazioni numericamente, aprendo la possibilità di mettere in atto i metodi studiati per il calcolo degli zeri di una funzione, nonché di apprenderne di nuovi.
+Il modello si scoprirà essere altamente non lineare, rendendo necessario l'utilizzo della variante Unscented Kalman Filter (UKF), che rappresenta un'estensione più complessa rispetto alla formulazione originale. Inoltre, la complessità del modello richiederà la soluzione numerica di equazioni, aprendo così la possibilità di applicare metodi avanzati per il calcolo degli zeri di funzioni, oltre alla sperimentazione e all'eventuale sviluppo di nuove tecniche numeriche.
 
 \iffalse
 Write your intro here.
@@ -109,12 +106,21 @@ you may need both \ac{vm} and \acp{vm}.
 \paragraph{Struttura della tesi}
 
 \begin{itemize}
+\item Capitolo 1:
+\begin{itemize}
 \item Definizione formale di sistema dinamico e del problema risolto dal filtro di Kalman.
 \item Costruzione algebrica, raccogliendo in modo più chiaro possibile i passaggi che portano alle formule finali.
 \item Esplorazione delle varianti non lineari, con i relativi pregi e difetti, includendo alcune delle innovazioni più recenti.
-\item Presentazione del modello astronomico, ossia l'insieme delle formule di astrometria e astrodinamica che governano i fenomeni del caso di applicazione studiato, da cui si ricaveranno le equazioni del sistema nella forma richiesta dal filtro, insieme alle matrici e i parametri necessari.
+\end{itemize}
+\item Capitolo 2:
+\begin{itemize}
+\item Presentazione del modello astronomico, ossia l'insieme delle formule di astrometria e astrodinamica che governano i fenomeni del caso di applicazione studiato, da cui si ricaveranno le equazioni del sistema nella forma richiesta dal filtro, insieme alle matrici e ai parametri necessari.
+\end{itemize}
+\item Capitolo 3:
+\begin{itemize}
 \item Discussione dell'implementazione di una simulazione del sistema e dei risultati ottenuti da essa, con successivo passaggio ai dati forniti dalle osservazioni reali e confronto.
 \item Infine, valutazione del vantaggio in termini di precisione portato dal processo di filtraggio, rispetto a un approccio diretto per il calcolo delle posizioni.
+\end{itemize}
 \end{itemize}
 
 \iffalse % Opt for a list instead
@@ -131,7 +137,7 @@ Si discuterà come è stata implementata la simulazione del sistema e i risultat
 \chapter{Fondamenti teorici}
 %----------------------------------------------------------------------------------------
 
-In questo capitolo si definiscono i concetti di base su cui si svilupperanno gli argomenti di questa tesi, insieme ai modelli matematici che li descrivono. Si presenta, inoltre, una costruzione algebrica del filtro di Kalman e si offre una panoramica delle sue varianti.
+In questo capitolo si definiscono i concetti alla base degli argomenti di questa tesi, insieme ai modelli matematici che li descrivono. Si presenta, inoltre, una costruzione algebrica del filtro di Kalman e si offre una panoramica delle sue varianti.
 
 \section{I sistemi dinamici}
 
@@ -174,7 +180,7 @@ Dalla combinazione delle imprecisioni nel modello e nelle misurazioni, nasce la 
 \section{Il filtro di Kalman}
 
 Il filtro di Kalman~\cite{10.1115/1.3662552}~\cite{WelchB95}~\cite{10.1145/3363294} è uno stimatore lineare ricorsivo che minimizza l'errore quadratico medio. \\
-L'aspetto ricorsivo implica, innanzitutto, che si tratta di un filtro a tempo discreto e si rifà al fatto che ogni stima $\hat{x}_k$ è determinata in base alla stima precedente $\hat{x}_{k-1}$ e alla misurazione attuale $z_k$, senza richiedere l'utilizzo esplicito di $\hat{x}_0,\hat{x}_1,...,\hat{x}_{k-2}$ o $z_1,...,z_{k-1}$. Si tratta di uno dei principali vantaggi del filtro, in quanto riduce sia la complessità temporale che quella spaziale, senza compromettere l'ottimalità. \\
+L'aspetto ricorsivo implica, innanzitutto, che il filtro opera in tempo discreto e che ogni stima $\hat{x}_k$ è determinata in base alla stima precedente $\hat{x}_{k-1}$ e alla misurazione corrente $z_k$, senza richiedere l'utilizzo esplicito di $\hat{x}_0,\hat{x}_1,...,\hat{x}_{k-2}$ o $z_1,...,z_{k-1}$. Questo costituisce uno dei principali vantaggi del filtro, in quanto riduce sia la complessità temporale che quella spaziale, senza compromettere l'ottimalità. \\
 Come anticipato, l'ottimalità è definita dal fatto che, ad ogni passo $k$, l'algoritmo produce la stima $\hat{x}_k$ che minimizza la quantità $\mathbb{E}[\lVert e_k\rVert^2]$, con $e_k=\hat{x}_k-x_k$. \\
 
 Il filtro è applicabile a un qualsiasi modello lineare a tempo discreto, anche tempo-variante, ossia descritto dalle equazioni \ref{eq:transition} e \ref{eq:output}.
@@ -316,7 +322,7 @@ $$P_k=(I-\mathcal{K}_kH_k)P_k^-(I-\mathcal{K}_kH_k)^T+\mathcal{K}_kR_k{\mathcal{
 
 Si osservi che minimizzare l'errore quadratico medio $\mathbb{E}[\Vert e_k\Vert^2]$ equivale a minimizzare la traccia di $P_k$. In effetti:
 $$\mathbb{E}[\Vert e_k\Vert^2]=\mathbb{E}[{e_k}^Te_k]=\mathbb{E}[\mathrm{tr}({e_k}^Te_k)]=\mathbb{E}\left[\mathrm{tr}\bigl(e_k(e_k)^T\bigr)\right]=\mathrm{tr}\left(\mathbb{E}\left[e_k(e_k)^T\right]\right)=\mathrm{tr}(P_k)$$
-Dunque, si calcoli:
+Dunque, si calcola:
 \begin{gather*}
 \mathrm{tr}(P_k)=\mathrm{tr}\Bigl((I-\mathcal{K}_kH_k)P_k^-(I-\mathcal{K}_kH_k)^T+\mathcal{K}_kR_k{\mathcal{K}_k}^T\Bigr)= \\
 =\mathrm{tr}\Bigl((I-\mathcal{K}_kH_k)P_k^-\left(I-{H_k}^T{\mathcal{K}_k}^T\right)+\mathcal{K}_kR_k{\mathcal{K}_k}^T\Bigr)= \\
@@ -325,7 +331,7 @@ Dunque, si calcoli:
 Essendo $P_k^-$ simmetrica, vale $P_k^-{H_k}^T{\mathcal{K}_k}^T=(P_k^-)^T{H_k}^T{\mathcal{K}_k}^T=(\mathcal{K}_kH_kP_k^-)^T$, \\
 per cui:
 $$\mathrm{tr}(P_k)=\mathrm{tr}\left(P_k^-\right)-2\,\mathrm{tr}\left(\mathcal{K}_kH_kP_k^-\right)+\mathrm{tr}\left(\mathcal{K}_kH_kP_k^-{H_k}^T{\mathcal{K}_k}^T\right)+\mathrm{tr}\left(\mathcal{K}_kR_k{\mathcal{K}_k}^T\right)$$
-Per ricercare $\mathcal{K}_k$ che minimizzi $\mathrm{tr}(P_k)$ si ponga:
+Per ricercare $\mathcal{K}_k$ che minimizza $\mathrm{tr}(P_k)$ si pone:
 \begin{gather*}
 \dfrac{\partial\,\mathrm{tr}(P_k)}{\partial\,\mathcal{K}_k}=0_{n\times n} \\
 \begin{multlined}[\textwidth]
@@ -333,7 +339,7 @@ Per ricercare $\mathcal{K}_k$ che minimizzi $\mathrm{tr}(P_k)$ si ponga:
 +\dfrac{\partial\,\mathrm{tr}\left(\mathcal{K}_kR_k{\mathcal{K}_k}^T\right)}{\partial\,\mathcal{K}_k}=0_{n\times n}
 \end{multlined}
 \end{gather*}
-Si osservi che $\mathrm{tr}(P_k^-)$ è costante in $K_k$, per cui il primo termine si annulla. Per calcolare i termini restanti, si utilizzino le seguenti identità, con la seconda valida se $N$ è simmetrica:
+Si osserva che $\mathrm{tr}(P_k^-)$ è costante in $K_k$, per cui il primo termine si annulla. Per calcolare i termini restanti, si utilizzino le seguenti identità, con la seconda valida se $N$ è simmetrica:
 $$\dfrac{\partial\,\mathrm{tr}(MN)}{\partial M}=N^T\enspace,\quad\dfrac{\partial\,\mathrm{tr}(MNM^T)}{\partial M}=2MN$$
 Si ottiene:
 \begin{gather*}
@@ -357,6 +363,7 @@ P_k=P_k^--P_k^-{H_k}^T{\mathcal{K}_k}^T-\mathcal{K}_kH_kP_k^-+\mathcal{K}_kH_kP_
 \end{gather*}
 
 Riassumendo, l'algoritmo si basa sulle seguenti formule:
+% TODO: allinea a sinistra!!!!!
 \begin{gather*}
 \hat{x}_0=\mathbb{E}[x_0] \\
 P_0=\mathrm{Cov}(x_0,x_0) \\[0.2\baselineskip]
@@ -376,7 +383,7 @@ Sulla base della formulazione originale di Kálmán --- oggi conosciuta come ``S
 
 \subsection{Extended Kalman Filter}
 
-EKF~\cite{WelchB95} nasce dalle prime applicazioni delle intuizioni di Kálmán e Bucy al programma Apollo~\cite{smith1962}. Si basa sull'utilizzo naturale del polinomio di Taylor di grado 1 per trovare approssimazioni lineari alle equazioni del sistema, in generale non lineari. \\
+EKF~\cite{WelchB95} nasce dalle prime applicazioni delle intuizioni di Kálmán e Bucy al programma Apollo~\cite{smith1962}. Si basa sull'utilizzo del polinomio di Taylor di grado 1 (ossia la linearizzazione tramite la derivata prima) per ottenere approssimazioni lineari alle equazioni del sistema. Questo permette di applicare la moderna teoria dei filtri di Kalman anche in contesti non lineari, come quelli affrontati nelle missioni spaziali Apollo. \\
 Partendo dalla formula generale del polinomio in una variabile reale:
 \begin{equation*}
 f(x)=f(a)+f^\prime(a)(x-a)+o(x-a)
@@ -411,11 +418,16 @@ Un logico sviluppo di queste idee prevede di includere anche i termini di second
 
 \subsection{Unscented Kalman Filter}
 
-UKF~\cite{882463} è il più noto dei cosiddetti filtri Sigma-Point. Queste varianti selezionano deterministicamente un piccolo insieme di punti ($2n+1$ per UKF) attorno a $\hat{x}_{k-1}$ e studiano come questi reagiscono alla trasformazione non lineare, fornendo informazioni più accurate sulla distribuzione delle stime ottenute. \\
+UKF~\cite{882463} è il più noto dei cosiddetti filtri Sigma-Point. Questi filtri selezionano deterministicamente un insieme ridotto di punti chiamati ``Sigma-Point'' ($2n+1$ per UKF, con $n$ dimensione dello stato) attorno alla stima precedente $\hat{x}_{k-1}$ e studiano come questi punti si trasformano attraverso la funzione non lineare, per ricostruire una stima più precisa della media e covarianza senza dover linearizzare la funzione con il polinomio di Taylor come per EKF. \\
 
-UKF utilizza tre parametri che influenzano la scelta dei Sigma-Point: $\alpha\ll1$ ne determina la dispersione, mentre $\beta=2$ e $\kappa=0$ raramente richiedono di essere modificati.
+UKF utilizza tre parametri che influenzano la scelta dei Sigma-Point:
+\begin{itemize}
+\item $\alpha\ll1$ regola la dispersione dei Sigma-Point attorno alla stima media. È un parametro di scala che influenza quanto i punti si distribuiscono intorno al valore centrale.
+\item $\beta$ è usato per incorporare informazioni sulla distribuzione dello stato (per variabili gaussiani il valore ottimale è $2$).
+\item $\kappa$ è un parametro di sovrappeso scalare, solitamente impostato a $0$, che stabilizza la selezione dei punti.
+\end{itemize}
 
-Una volta determinato il parametro intermedio $\lambda=\alpha^2(n+\kappa)-n$, si calcola la matrice $(\lambda+n)P_{k-1}$ e si utilizza un metodo di decomposizione, come l'algoritmo di Cholesky, per trovare $U=\sqrt{(\lambda+n)P_{k-1}}$. \\
+Una volta definiti tali parametri, si calcola il parametro intermedio $\lambda=\alpha^2(n+\kappa)-n$, che serve per costruire la matrice $(\lambda+n)P_{k-1}$ con $P_{k-1}$ la matrice di covarianza dello stato all'istante precedente. Per trovare i Sigma-Point, si esegue una decomposizione (tipicamente una decomposizione di Cholesky) di questa matrice, ottenendo la matrice $U=\sqrt{(\lambda+n)P_{k-1}}$. \\
 Ora, indicando con $U_{[i]}$ la $i$-esima riga di $U$, i punti selezionati sono dati da:
 \begin{equation*}
 \mathbf{x}_{k-1}^{(i)}=\begin{cases}
@@ -460,7 +472,7 @@ Infine, la stima \textit{a posteriori} e la relativa auto-covarianza sono date d
 P_k=P_k^--\mathcal{K}_k\mathrm{Cov}(\hat{z}_k^-,\hat{z}_k^-)\mathcal{K}_k^T
 \end{gather*}
 
-UKF permette di determinare stime accurate quanto un polinomio di Taylor di grado 3, ma con la stessa complessità computazionale di EKF base.
+UKF permette di ottenere stime di sistemi non lineari con una precisione equivalente a quella di un polinomio di Taylor di grado 3. Questo significa che l'approssimazione della trasformazione non lineare fatta da UKF è accurata fino al terzo ordine di derivata della funzione non lineare, ma con la stessa complessità computazionale di EKF base.
 
 Sono disponibili diverse implementazioni di questo algoritmo. In questa tesi si farà uso della classe \lstinline{filterpy.kalman.UnscentedKalmanFilter}, con i relativi Sigma-Point \lstinline{filterpy.kalman.sigma_points.MerweScaledSigmaPoints}. \\
 
@@ -468,7 +480,11 @@ Altre varianti di tipo Sigma-Point includono i filtri Quadrature KF (QKF), fra c
 
 \subsection{Metodo Monte Carlo}
 
-Un'ulteriore strategia per lo studio della distribuzione di una variabile aleatoria sottoposta ad una trasformazione non lineare è il classico metodo Monte Carlo. Diversamente dai metodi Sigma-Point, si considerano campioni cospicui di punti, consentendo di raggiungere precisione arbitraria a costo di un maggiore onere computazionale, il quale, però, può essere facilmente distribuito con tecniche di parallelizzazione. Da queste idee nascono Ensemble KF (EnKF), che richiede distribuzioni iniziali Gaussiane, e i Particle Filters (PF), estremamente flessibili, ma meno efficienti.
+Un'ulteriore strategia per lo studio della distribuzione di una variabile aleatoria sottoposta ad una trasformazione non lineare è il classico metodo Monte Carlo. Diversamente dai metodi Sigma-Point, si considerano campioni cospicui di punti, consentendo di raggiungere precisione arbitraria a costo di un maggiore onere computazionale, il quale, però, può essere facilmente distribuito con tecniche di parallelizzazione. Da queste idee nascono Ensemble KF (EnKF) e i Particle Filters (PF).
+
+Ensemble Kalman Filter (EnKF): basato su un campione (\textit{ensemble}) di stati che rappresentano la distribuzione di probabilità, mantiene la supposizione di distribuzioni Gaussiane iniziali. EnKF sostituisce la matrice di covarianza con la covarianza campionaria calcolata sull'\textit{ensemble}, evitando così di dover gestire esplicitamente matrici di covarianza grandi e complesse. Ogni membro dell'\textit{ensemble} evolve indipendentemente e viene aggiornato in seguito all'osservazione, assicurando efficienza computazionale anche in spazi di stato di dimensioni molto elevate.
+
+Particle Filter (PF): estremamente flessibile e robusto anche per distribuzioni non Gaussiane, usa un insieme di particelle (campioni) per rappresentare la distribuzione dello stato, con pesi che riflettono la probabilità. È però più costoso computazionalmente e meno efficiente rispetto a EnKF.
 
 \iffalse % Discarded list
 \begin{itemize}
@@ -504,14 +520,22 @@ Nell'utilizzo delle varianti EKF e Sigma-Point, spesso si sceglie di memorizzare
 
 \section{Sviluppi recenti}
 
-Lo studio del filtro di Kalman resta un settore vivo, a più di 60 anni dalla sua concezione. Si continuano a identificare nuovi settori di applicazione, nuove tecniche di miglioramento dell'accuratezza, della stabilità numerica e della performance computazionale. Nuove varianti, sia generiche che specializzate, si aggiungono a quelle già consolidate. Solo negli ultimi mesi si evidenziano una tecnica di ``Iteratively Saturated Kalman Filtering'' (ISKF)~\cite{yang2025}, che mira a ridurre l'impatto di eventuali misurazioni anomale, e la possibilità di affiancare una rete neurale profonda (DNN) ad un filtro classico nei cosiddetti ``AI-Aided Kalman Filters''~\cite{shlezinger2025}.
+Lo studio del filtro di Kalman resta un settore vivo, a più di 60 anni dalla sua concezione. Si continuano a identificare nuovi settori di applicazione, nuove tecniche di miglioramento dell'accuratezza, della stabilità numerica e della performance computazionale. Nuove varianti, sia generiche che specializzate, si aggiungono a quelle già consolidate. Solo negli ultimi mesi si evidenziano nuove tecniche di ``Iteratively Saturated Kalman Filtering'' (ISKF)~\cite{yang2025} e la possibilità di affiancare una rete neurale profonda (DNN) ad un filtro classico nei cosiddetti ``AI-Aided Kalman Filters''~\cite{shlezinger2025}.
+
+ISKF è una nuova variante del filtro di Kalman progettata per rendere il filtro più robusto nei confronti di misurazioni anomale o \textit{outlier}. Questo approccio modifica iterativamente il passo di aggiornamento del filtro standard applicando una funzione di saturazione per compensare errori e rumori anomali nei dati di misura e nei rumori di processo. Derivato come un metodo di gradiente scalato per risolvere un problema convesso di stima robusta, ISKF mantiene la semplicità e l'efficienza computazionale del filtro di Kalman tradizionale, spesso richiedendo solo una o due iterazioni per migliorare significativamente la stima in presenza di \textit{outlier}. Inoltre, possiede una variante in stato stazionario che ne migliora l'efficienza per applicazioni in tempo reale, senza richiedere complessi calcoli matriciali ad ogni passo.
+
+I filtri AI-Aided ibridano i filtri di Kalman classici con reti neurali profonde (DNN) per superare i limiti imposti dai modelli di stato-spazio semplificati o inaccurati. Le DNN possono apprendere rappresentazioni più complesse e non lineari del sistema dinamico direttamente dai dati, permettendo cosi un miglioramento nel tracking e nella stima dello stato in scenari complessi. Le tecniche di AI-aided KF si dividono in:
+\begin{itemize}
+\item Approcci orientati al compito (task-oriented), che integrano reti DNN esterne o parallele al filtro per migliorare la stima.
+\item Approcci orientati al modello di stato-spazio (SS model-oriented), in cui le DNN aiutano nell'identificazione del modello matematico parziale del sistema, migliorando il filtro basato su model-based tracking.
+\end{itemize}
 
 \section{Limitazioni}
 
 Sebbene oggi assuma un ruolo fondamentale nell'ingegneria aerospaziale e in diversi altri settori, il filtro di Kalman presenta alcune limitazioni intrinseche:
 \begin{itemize}
-\item Per sistemi non lineari con distribuzioni non Gaussiane, non è garantita, in generale, l'ottimalità.
-\item Benché la conoscenza del sistema reale sia la base dell'efficacia del filtro, questa può anche costituire un limite sulla precisione, qualora modelli sufficientemente accurati non siano disponibili.
+\item La prima riguarda i sistemi non lineari con distribuzioni di rumore non gaussiane: in questi casi, l'ottimalità dell'algoritmo non è garantita, perché le assunzioni fondamentali del filtro (linearità e gaussianità) vengono violate. Questo porta a stime spesso sub-ottimali, soprattutto quando i modelli di sistema si discostano dalla realtà e le distribuzioni di errore sono complesse.
+\item La seconda limitazione è legata alla dipendenza dall'accuratezza del modello matematico che descrive il sistema reale. Il filtro utilizza questo modello per stimare l'evoluzione dello stato nel tempo, ma se il modello è impreciso o incompleto, la stima risulterà inevitabilmente meno affidabile. Questo è particolarmente critico in sistemi complessi, dove non sempre è possibile costruire modelli sufficientemente dettagliati o precisi. Inoltre, l'adattamento e la regolazione dei parametri del filtro richiedono spesso procedure empiriche e possono introdurre ulteriori fonti di errore o instabilità.
 \end{itemize}
 
 % I suggest referencing stuff as follows: \cref{fig:random-image} or \Cref{fig:random-image}
@@ -557,7 +581,7 @@ Dunque, indicando con $\Delta$ la distanza apparente tra l'osservatore e il corp
 \end{equation}
 La conversione a coordinate baricentriche richiede semplicemente di sommare la posizione dell'osservatore rispetto al baricentro del sistema solare. \\
 
-Si definiscono le distanze apparenti $R$ tra l'osservatore e il Sole al momento dell'osservazione e $d$ (solitamente indicata con $r$, ma da non confondersi con la distanza dal fuoco occupato dell'orbita) tra il corpo osservato e il Sole nel momento in cui la luce osservata viene riflessa sulla superficie del corpo. Si definiscono gli angoli di separazione $\theta\in[0,\pi]$, detta elongazione, tra il corpo e il Sole come appaiono all'osservatore al momento dell'osservazione e $\phi\in[0,\pi]$, detto angolo di fase, tra l'osservatore e il Sole come appaiono dal corpo nel momento in cui la luce osservata viene riflessa. Seppure si tratti di una definizione analoga, l'angolo di fase viene definito, in genere, come l'angolo tra la luce incidente e la luce riflessa verso l'osservatore, per via del suo impatto sul modello ottico descritto nella sezione~\ref{sec:photometry}. \\
+Si definiscono le distanze apparenti $R$ tra l'osservatore e il Sole al momento dell'osservazione e $d$ (solitamente indicata con $r$, ma da non confondersi con la distanza dal fuoco occupato dell'orbita) tra il corpo osservato e il Sole nel momento in cui la luce osservata viene riflessa sulla superficie del corpo. Si definiscono gli angoli di separazione $\theta\in[0,\pi]$, detta \textit{elongazione}, tra il corpo e il Sole come appaiono all'osservatore al momento dell'osservazione e $\phi\in[0,\pi]$, detto angolo di fase, tra l'osservatore e il Sole come appaiono dal corpo nel momento in cui la luce osservata viene riflessa. Seppure si tratti di una definizione analoga, l'angolo di fase viene definito, in genere, come l'angolo tra la luce incidente e la luce riflessa verso l'osservatore, per via del suo impatto sul modello ottico descritto nella sezione~\ref{sec:photometry}. \\
 
 Si è parlato finora di quantità apparenti. Questa precisazione è necessaria per via della velocità finita della luce e ad altri fenomeni come aberrazioni, rifrazioni ed effetti relativistici. Da questo punto in poi si considereranno le quantità apparenti come coincidenti alle controparti ``reali'' (geometriche), con la consapevolezza che ciò introdurrà imprecisioni nel modello, le quali dovranno essere considerate nell'applicazione del filtro di Kalman. Queste imprecisioni sono accettabili per il tracciamento di asteroidi, ma possono diventare problematiche per oggetti più veloci.
 
@@ -620,7 +644,7 @@ r=a(1-e\cos(E))
 \end{equation}
 
 %----------------------------------------------------------------------------------------
-\chapter{Contributo}
+\chapter{Adattamento del filtro di Kalman al caso di studio: formulazione e risultati}
 %----------------------------------------------------------------------------------------
 
 In questo capitolo si illustra come sono state messe in pratica le nozioni teoriche in modo da sperimentare concretamente l'utilizzo del filtro di Kalman, come sono state adattate le formule astronomiche per ottenere le equazioni del sistema, come sono state ricavate le matrici di covarianza e le sfide affrontate durante il percorso. Si presentano, infine, i risultati ottenuti dapprima su dati simulati e successivamente su dati reali.
@@ -673,9 +697,9 @@ Si procede ora con l'impostazione del problema sotto forma di sistema dinamico, 
 
 \section{Sfide sul tracciamento di angoli}\label{sec:angle-challenges}
 
-Per via della natura del problema, si vuole memorizzare quantità angolari sia nel vettore di stato che nel vettore di misurazione. Tuttavia, fare ciò senza dovuti accorgimenti introdurrebbe forti discontinuità nelle equazioni che descrivono il sistema. Si noti, ad esempio, che all'avanzare dell'anomalia, questa passa da $\nu\approx2\pi$ a $\nu\approx0$. In aggiunta, una stima $\hat{\nu}\approx2\pi$ affiancata ad una misurazione $\nu\approx0$ è in realtà da considerarsi valida, ma dal punto di vista del filtro apparirebbe come una grossa discrepanza.
+A causa della natura del problema, è necessario memorizzare le quantità angolari sia nel vettore di stato che in quello di misurazione. Tuttavia, farlo senza le dovute precauzione causerebbe forti discontinuità nelle equazioni che descrivono il sistema. Si noti, ad esempio, che all'avanzare dell'anomalia, questa passa da $\nu\approx2\pi$ a $\nu\approx0$. In aggiunta, una stima $\hat{\nu}\approx2\pi$ affiancata ad una misurazione $\nu\approx0$ è in realtà da considerarsi valida, ma dal punto di vista del filtro apparirebbe come una grossa discrepanza.
 
-Per affrontare questo problema, si decide di non memorizzare direttamente gli angoli, ma bensì di rappresentarli nelle loro componenti sulla circonferenza unitaria, ossia la coppia $\bigl(cos(\cdot),sin(\cdot)\bigr)$. Questo approccio è analogo alla rappresentazione di rotazioni in tre dimensioni attraverso l'uso di quaternioni e permette di rimuovere le discontinuità di cui si è parlato.
+Per affrontare questo problema, si decide di non memorizzare direttamente gli angoli, ma bensì di rappresentarli tramite le loro componenti sulla circonferenza unitaria, ossia la coppia $\bigl(cos(\cdot),sin(\cdot)\bigr)$. Questo approccio è analogo alla rappresentazione di rotazioni in tre dimensioni attraverso l'uso di quaternioni e permette di rimuovere le discontinuità di cui si è parlato, poiché le coordinate sulla circonferenza unitaria sono continue e periodiche, evitando così problemi dovuti al salto tra valori di angoli equivalenti (come $2\pi$ e $0$).
 
 In figura~\ref{fig:angle-method-comparison} si mostra l'efficacia di questa soluzione applicata alla simulazione di un corpo in moto circolare uniforme.
 
@@ -691,11 +715,11 @@ Tuttavia restano delle limitazioni, dovute al fatto che questa trasformazione è
 
 \section{Scelta dei vettori di stato e di misurazione}
 
-Un passo fondamentale è la scelta delle quantità da considerare nel vettore di stato. I parametri orbitali $a,e,i,\Omega,\omega$ sono pressoché costanti, ma averne stime accurate nel tempo può essere vantaggioso, per cui si sceglie di tracciarli. Questo apre anche la possibilità di partire con stime grossolane e lasciare al filtro il compito di determinare i valori più probabili. \\
-Il moto medio $n$ può sempre essere determinato dal semiasse maggiore, ma un approccio che consenta piccole variazioni dovute a fattori esterni può produrre risultati migliori. \\
+Un passo fondamentale è la scelta delle quantità da includere nel vettore di stato. I parametri orbitali $a,e,i,\Omega,\omega$ sono pressoché costanti, ma averne stime accurate nel tempo può essere vantaggioso, per cui si sceglie di tracciarli. Questa scelta permette anche di partire da stime iniziali approssimative e lasciare al filtro il compito di individuare i valori più probabili. \\
+Il moto medio $n$ può sempre essere calcolato a partire dal semiasse maggiore, ma un approccio che consenta piccole variazioni dovute a fattori esterni può migliorare la qualità della stima. \\
 I parametri $H$ e $G$ sono costanti, ma soggetti ad incertezza, per cui si cerca di trovare stime più accurate. \\
 
-La decisione più complessa riguarda la posizione del corpo. L'obiettivo finale è tracciarne la posizione cartesiana, per cui un'opzione naturale sarebbe quella di aggiungere al vettore le componenti $x,y,z$. Tuttavia, per questa tesi si è scelto di tracciare l'anomalia media $M$ e, solo in un secondo momento, risalire alla posizione cartesiana. Questo permette di avere una legge di evoluzione molto più semplice e numericamente stabile. Sarebbe comunque consigliabile uno studio approfondito per mettere a confronto le diverse alternative. \\
+La decisione più complessa riguarda la posizione del corpo. L'obiettivo finale è tracciarne la posizione cartesiana, per cui un'opzione naturale sarebbe quella di aggiungere al vettore le componenti $x,y,z$. Tuttavia, in questa tesi si è scelto di tracciare l'anomalia media $M$ e, solo in un secondo momento, risalire alla posizione cartesiana. Questo approccio consente di utilizzare una legge di evoluzione molto più semplice e numericamente stabile. Sarebbe comunque consigliabile uno studio approfondito per mettere a confronto le diverse alternative. \\
 
 In conclusione, esprimendo le quantità angolari nelle loro componenti, come descritto nella sezione~\ref{sec:angle-challenges}, il vettore di stato diventa:
 \begin{equation}
