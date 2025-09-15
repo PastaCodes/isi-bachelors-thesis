@@ -8,6 +8,7 @@
 \usepackage{amsmath}
 \usepackage{mathtools}
 \usepackage{tikz-cd}
+\usepackage{booktabs}
 
 \school{\unibo}
 \programme{Corso di Laurea
@@ -845,7 +846,7 @@ Questi archivi sono file di testo in classico stile Fortran a 80 colonne e seguo
 Il file \lstinline{parse.py} si occupa dell'interpretazione dei dati e della trasformazione in oggetti \lstinline{MinorPlanetObservation}. Questo passaggio richiede la conversione degli angoli in radianti e della magnitudine osservata in magnitudine visuale. In effetti, i modelli fotometrici si basano sulla magnitudine relativa alla luce visibile, per cui può essere necessario utilizzare la tabella di conversione fornita alla pagina \url{https://www.minorplanetcenter.net/iau/info/BandConversion.txt}. \\
 Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore. Anche in questo caso, un servizio di effemeridi può essere utilizzato per risalire alla posizione baricentrica dell'osservatore in un determinato istante date le coordinate geodetiche. \pagebreak
 
-Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$. In figura~\ref{fig:Bennu130} si riportano i risultati sulle prime 130 osservazioni. Anche in questo caso si osserva una generale convergenza, seppur decisamente più lenta rispetto alla simulazione. Inoltre, si è osservato che il processo non risulta perfettamente stabile; su altre porzioni di dati, lievi discostamenti improvvisi portano a rapida divergenza. Tutto ciò potrebbe essere dovuto a diversi motivi, possibilmente legati a problemi di stabilità numerica, per cui studi ulteriori sono necessari. In ogni caso, si è mostrato come il filtro permetta di ottenere risultati dalle 10 alle 100 volte più accurati rispetto all'approccio diretto, nonostante le diverse semplificazioni che sono state fatte, dando prova concreta dell'utilità del filtro di Kalman in questo contesto reale.
+Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$. In figura~\ref{fig:Bennu130} si riportano i risultati sulle prime 130 osservazioni dell'asteroide Bennu (1999 RQ36). Anche in questo caso si osserva una generale convergenza, seppur decisamente più lenta rispetto alla simulazione. Inoltre, si è osservato che il processo non risulta perfettamente stabile; su altre porzioni di dati, lievi discostamenti improvvisi portano a rapida divergenza. Tutto ciò potrebbe essere dovuto a diversi motivi, possibilmente legati a problemi di stabilità numerica, per cui studi ulteriori sono necessari. In ogni caso, si è mostrato come il filtro permetta di ottenere risultati dalle 10 alle 100 volte più accurati rispetto all'approccio diretto, nonostante le diverse semplificazioni che sono state fatte, dando prova concreta dell'utilità del filtro di Kalman in questo contesto reale.
 
 \begin{figure}
     \includegraphics[width=0.55\linewidth]{figures/Bennu_130_3d.png}
@@ -854,6 +855,37 @@ Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3
     \label{fig:Bennu130}
     \vspace{2\baselineskip}
 \end{figure}
+
+\begin{figure}
+    \includegraphics[width=0.55\linewidth]{figures/Mjolnir_60_3d.png}
+    \includegraphics[width=0.45\linewidth]{figures/Mjolnir_60_error.png}
+    \includegraphics[width=0.55\linewidth]{figures/1950_DA_70_3d.png}
+    \includegraphics[width=0.45\linewidth]{figures/1950_DA_70_error.png}
+    \caption{Visualizzazione delle stime sui dati reali degli asteroidi Mjolnir (sopra, prime 60 osservazioni) e 1950 DA (sotto, prime 70 osservazioni), confrontate con l'approccio diretto.}
+    \label{fig:Mjolnir60+1950DA70}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[width=0.55\linewidth]{figures/Castalia_50_3d.png}
+    \includegraphics[width=0.45\linewidth]{figures/Castalia_50_error.png}
+    \caption{Visualizzazione delle stime sui dati reali dell'asteroide Castalina (prime 50 osservazioni), confrontate con l'approccio diretto. Si osservano cenni di divergenza.}
+    \label{fig:Castalia50}
+\end{figure}
+
+\begin{table}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lccccc@{}}
+                   & Minimo  & Q1 (25\%) & Mediana & Q2 (75\%) & Massimo \\\toprule
+Bennu (diretto)    & 2.60e-4 & 4.30e-3 & 7.92e-3 & 1.13e-2 & 1.86e-2 \\
+Bennu (UKF)        & 1.61e-4 & 6.32e-4 & 5.19e-3 & 8.18e-3 & 1.85e-2 \\\midrule
+Mjolnir (diretto)  & 8.92e-4 & 9.87e-3 & 2.30e-2 & 4.29e-2 & 7.13e-2 \\
+Mjolnir (UKF)      & 9.84e-4 & 2.50e-3 & 4.45e-3 & 9.12e-3 & 1.45e-2 \\\midrule
+1950 DA (diretto)  & 2.90e-3 & 2.32e-2 & 4.32e-2 & 1.06e-1 & 3.77e-1 \\
+1950 DA (UKF)      & 3.98e-3 & 2.01e-2 & 2.96e-2 & 3.53e-2 & 4.57e-2 \\\midrule
+Castalia (diretto) & 3.89e-3 & 3.18e-2 & 7.81e-2 & 1.30e-1 & 4.06e-1 \\
+Castalia (UKF)     & 3.44e-3 & 2.04e-2 & 3.30e-2 & 6.87e-2 & 2.75e-1 \\\midrule
+\end{tabular*}
+\caption{Caratterizzazione degli errori sulle posizioni attraverso un riepilogo a cinque numeri.}
+\end{table}
 
 \chapterWithoutNumber{Conclusioni}
 
