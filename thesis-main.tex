@@ -9,6 +9,7 @@
 \usepackage{mathtools}
 \usepackage{tikz-cd}
 \usepackage{booktabs}
+\usepackage{subcaption}
 
 \school{\unibo}
 \programme{Corso di Laurea
@@ -362,20 +363,19 @@ P_k=P_k^--P_k^-{H_k}^T{\mathcal{K}_k}^T-\mathcal{K}_kH_kP_k^-+\mathcal{K}_kH_kP_
 =\left(I-\mathcal{K}_kH_k\right)P_k^-
 \end{gather*}
 
-Riassumendo, l'algoritmo si basa sulle seguenti formule:
-% TODO: allinea a sinistra!!!!!
-\begin{gather*}
-\hat{x}_0=\mathbb{E}[x_0] \\
-P_0=\mathrm{Cov}(x_0,x_0) \\[0.2\baselineskip]
+\noindent Riassumendo, l'algoritmo si basa sulle seguenti formule:
+\begin{flalign*}
+& \hat{x}_0=\mathbb{E}[x_0] & \\
+& P_0=\mathrm{Cov}(x_0,x_0) & \\[0.2\baselineskip]
 \hline \\[-0.8\baselineskip]
-\textbf{Fase di predizione:} \\
-\hat{x}_k^-=A_k\hat{x}_{k-1}+Bu_{k-1} \\
-P_k^-=A_kP_{k-1}{A_k}^T+Q_{k-1} \\
-\textbf{Fase di correzione:} \\
-\mathcal{K}_k=P_k^-{H_k}^T\left(H_kP_k^-{H_k}^T+R_k\right)^{-1} \\
-\hat{x}_k=\hat{x}_k^-+\mathcal{K}_k(z_k-H_k\hat{x}_k^-) \\
-P_k=\left(I-\mathcal{K}_kH_k\right)P_k^-
-\end{gather*}
+& \textbf{Fase di predizione:} & \\
+& \hat{x}_k^-=A_k\hat{x}_{k-1}+Bu_{k-1} & \\
+& P_k^-=A_kP_{k-1}{A_k}^T+Q_{k-1} & \\
+& \textbf{Fase di correzione:} & \\
+& \mathcal{K}_k=P_k^-{H_k}^T\left(H_kP_k^-{H_k}^T+R_k\right)^{-1} & \\
+& \hat{x}_k=\hat{x}_k^-+\mathcal{K}_k(z_k-H_k\hat{x}_k^-) & \\
+& P_k=\left(I-\mathcal{K}_kH_k\right)P_k^- &
+\end{flalign*}
 
 \section{Varianti non lineari}
 
@@ -422,9 +422,9 @@ UKF~\cite{882463} è il più noto dei cosiddetti filtri Sigma-Point. Questi filt
 
 UKF utilizza tre parametri che influenzano la scelta dei Sigma-Point:
 \begin{itemize}
-\item $\alpha\ll1$ regola la dispersione dei Sigma-Point attorno alla stima media. È un parametro di scala che influenza quanto i punti si distribuiscono intorno al valore centrale.
+\item $\alpha$, con $0<\alpha\ll1$, regola la dispersione dei Sigma-Point attorno alla stima media. È un parametro di scala che influenza quanto i punti si distribuiscono intorno al valore centrale.
 \item $\beta$ è usato per incorporare informazioni sulla distribuzione dello stato (per variabili gaussiani il valore ottimale è $2$).
-\item $\kappa$ è un parametro di sovrappeso scalare, solitamente impostato a $0$, che stabilizza la selezione dei punti.
+\item $\kappa$ è un parametro di sovrappeso scalare, solitamente impostato a $0$, che può aiutare a stabilizzare la selezione dei punti.
 \end{itemize}
 
 Una volta definiti tali parametri, si calcola il parametro intermedio $\lambda=\alpha^2(n+\kappa)-n$, che serve per costruire la matrice $(\lambda+n)P_{k-1}$ con $P_{k-1}$ la matrice di covarianza dello stato all'istante precedente. Per trovare i Sigma-Point, si esegue una decomposizione (tipicamente una decomposizione di Cholesky) di questa matrice, ottenendo la matrice $U=\sqrt{(\lambda+n)P_{k-1}}$. \\
@@ -774,7 +774,11 @@ x_k=\begin{pmatrix}
 \end{pmatrix}
 \end{gather*}
 
-La trasformazione di uscita $h$, invece, prevede una fase iniziale di calcolo della posizione cartesiana. Dall'anomalia media si passa all'anomalia eccentrica, secondo la formula~\ref{eq:mean2ecc}, poi dall'anomalia eccentrica all'anomalia vera, secondo la formula~\ref{eq:ecc2true}, e alla distanza radiale $r$, secondo la formula~\ref{eq:ecc2dist}. Dunque, la posizione è data dalla formula~\ref{eq:orbit2pos}.
+\lstinputlisting[basicstyle=\scriptsize\ttfamily,firstline=53,lastline=57]{listings/model.py}
+
+La trasformazione di uscita $h$, invece, prevede una fase iniziale di calcolo della posizione cartesiana, del tutto analoga alla trasformazione finale delle stime in posizioni cartesiane. Dall'anomalia media si passa all'anomalia eccentrica, secondo la formula~\ref{eq:mean2ecc}, poi dall'anomalia eccentrica all'anomalia vera, secondo la formula~\ref{eq:ecc2true}, e alla distanza radiale $r$, secondo la formula~\ref{eq:ecc2dist}. Dunque, la posizione è data dalla formula~\ref{eq:orbit2pos}. Nel codice:
+
+\lstinputlisting[basicstyle=\scriptsize\ttfamily,firstline=28,lastline=35,label={lst:finalize-transform}]{listings/model.py}
 
 Successivamente, dalla posizione baricentrica si ottiene la posizione topocentrica e si determinano i valori osservati. Anche in questo caso si fa uso di un servizio di effemeridi. Trovato $\hat{\Delta}$ come vettore normalizzato della posizione topocentrica e $\Delta$ come il suo modulo, si sfrutta l'inverso della formula~\ref{eq:radec2dir}:
 \begin{gather}
@@ -784,7 +788,9 @@ Successivamente, dalla posizione baricentrica si ottiene la posizione topocentri
 \sin(\alpha)=\frac{y}{\cos(\delta)}
 \end{gather}
 
-Infine, la magnitudine visuale $V$ è data dalla formula~\ref{eq:hg-mag}, utilizzando l'angolo di fase ricavato dalla formula~\ref{eq:cosinelaw-phi}.
+Per i casi speciali $\delta=\pm\pi$, si pone arbitrariamente $\alpha=0$. Infine, la magnitudine visuale $V$ è data dalla formula~\ref{eq:hg-mag}, utilizzando l'angolo di fase ricavato dalla formula~\ref{eq:cosinelaw-phi}. Nel complesso:
+
+\lstinputlisting[basicstyle=\scriptsize\ttfamily,firstline=38,lastline=50,label={lst:measure}]{listings/model.py}
 
 \section{Matrici di covarianza}\label{sec:real-system-covs}
 
@@ -835,26 +841,49 @@ R=\left(\begin{smallmatrix}
 
 \section{Simulazione}
 
-Inizialmente si è scelto di verificare l'efficacia del filtro utilizzando dati simulati. In primo luogo, il file \lstinline{simulation/ideal_model_test.py} si occupa di simulare il moto orbitale, sia del corpo osservato, che del Sole e dell'osservatore, secondo le formule descritte nella sezione~\ref{sec:orbits}. Per garantire dati realistici, sono stati usati parametri orbitali reali, seppur successivamente considerati costanti, ottenuti dalla piattaforma JPL Horizons, in particolare accurati all'epoca J2000.0 tempo dinamico baricentrico. Per il corpo osservato si è considerato Bennu (1999 RQ36) e per l'osservatore si è considerato il baricentro Terra-Luna, garantendo sufficiente diversificazione nei dati.
+Inizialmente si è scelto di verificare l'efficacia del filtro utilizzando dati simulati. In primo luogo, il file \lstinline{simulation/ideal_model_test.py} si occupa di simulare il moto orbitale, sia del corpo osservato, che del Sole e dell'osservatore, attraverso la seguente funzione, che si avvale delle formule descritte nella sezione~\ref{sec:orbits} in modo simile alla funzione \hyperref[lst:finalize-transform]{\lstinline{finalize_transform}}:
 
-Dalle posizioni dei tre soggetti, si determinano, poi, i valori osservati. Gli angoli $\alpha,\delta$ sono ottenuti dalla direzione $\hat{\Delta}$, dopo che essa è stata perturbata secondo una distribuzione di Fisher (\lstinline{scipy.stats.vonmises_fisher}). La magnitudine visuale $V$ è ricavata dall'angolo di fase, a sua volta ricavato trigonometricamente, e perturbata secondo una distribuzione normale (\lstinline{numpy.random.normal}). \\
+\lstinputlisting[basicstyle=\scriptsize\ttfamily,firstline=1,lastline=7]{listings/ideal_model_test.py}
+
+Per garantire dati realistici, sono stati usati parametri orbitali reali, seppur successivamente considerati costanti, ottenuti dalla piattaforma JPL Horizons, in particolare accurati all'epoca J2000.0 tempo dinamico baricentrico. Per il corpo osservato si è considerato Bennu (1999 RQ36) e per l'osservatore si è considerato il baricentro Terra-Luna, garantendo sufficiente diversificazione nei dati.
+
+Dalle posizioni dei tre soggetti, si determinano, poi, i valori osservati, come nella funzione \hyperref[lst:measure]{\lstinline{measure}}, ma applicando disturbi di misurazione. Gli angoli $\alpha,\delta$ sono ottenuti dalla direzione $\hat{\Delta}$, dopo che essa è stata perturbata secondo una distribuzione di Fisher (\lstinline{scipy.stats.vonmises_fisher}). La magnitudine visuale $V$ è ricavata dall'angolo di fase, a sua volta ricavato trigonometricamente, e perturbata secondo una distribuzione normale (\lstinline{numpy.random.normal}):
+
+\lstinputlisting[basicstyle=\scriptsize\ttfamily,firstline=10,lastline=23]{listings/ideal_model_test.py}
+
 Ovviamente questa simulazione non modellizza la velocità finita della luce. \\
 
-Una volta ottenute le osservazioni, separate da un lasso di tempo variabile, si crea un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$ e vengono fornite la legge di evoluzione $f$ e la trasformazione di uscita $h$ ricavate nella sezione~\ref{sec:real-system-eqs} e le matrici di covarianza $R$ e $Q$ della sezione~\ref{sec:real-system-covs}. Le stime sono poi confrontate con le posizioni ottenute dall'approccio diretto discusso nella sezione~\ref{sec:naive}. \\
+Una volta ottenute le osservazioni, separate da un lasso di tempo variabile, si crea un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$ e vengono fornite la legge di evoluzione $f$ e la trasformazione di uscita $h$ ricavate nella sezione~\ref{sec:real-system-eqs} e le matrici di covarianza $R$ e $Q$ della sezione~\ref{sec:real-system-covs}.
 
-In figura~\ref{fig:sim20} si riportano i risultati sui primi 20 passi di simulazione, con una rappresentazione 3D delle posizioni e un grafico di andamento dell'errore, calcolato come $\left\Vert\left(\begin{smallmatrix}\hat{x}\\\hat{y}\\\hat{z}\end{smallmatrix}\right)-\left(\begin{smallmatrix}x\\y\\z\end{smallmatrix}\right)\right\Vert$. Il numero limitato di passi mostrati ha lo scopo di permettere di distinguere i punti dati. Si evidenzia una graduale convergenza.
+\lstinputlisting[basicstyle=\scriptsize\ttfamily,firstline=28,lastline=45]{listings/ideal_model_test.py}
+
+Le stime sono poi confrontate con le posizioni ottenute dall'approccio diretto discusso nella sezione~\ref{sec:naive}. In figura~\ref{fig:sim20+150} si riportano i risultati sui primi 20 passi di simulazione, poi sui primi 150, con una rappresentazione 3D delle posizioni e un grafico di andamento dell'errore, calcolato come $\left\Vert\left(\begin{smallmatrix}\hat{x}\\\hat{y}\\\hat{z}\end{smallmatrix}\right)-\left(\begin{smallmatrix}x\\y\\z\end{smallmatrix}\right)\right\Vert$. Si evidenzia una graduale convergenza.
 
 \begin{figure}
-    \includegraphics[width=0.55\linewidth]{figures/simulation_20_3d.png}
-    \includegraphics[width=0.45\linewidth]{figures/simulation_20_error.png}
-    \caption{Visualizzazione delle stime sui dati simulati (primi 20 passi), confrontate con l'approccio diretto.}
-    \label{fig:sim20}
-    \vspace{2\baselineskip}
+    \begin{subfigure}[b]{\linewidth}
+        \centering
+        \begin{subfigure}[b]{0.55\linewidth}
+            \includegraphics[width=\linewidth]{figures/simulation_20_3d.png}
+        \end{subfigure}%
+        \hfill%
+        \begin{subfigure}[b]{0.45\linewidth}
+            \includegraphics[width=\linewidth]{figures/simulation_20_error.png}
+        \end{subfigure}
+    \end{subfigure}
+    \bigskip
+    \begin{subfigure}[b]{\linewidth}
+        \centering
+        \includegraphics[width=0.7\linewidth]{figures/simulation_150_error.png}
+    \end{subfigure}
+    \caption{Visualizzazione delle stime sui dati simulati (primi 20 passi, sopra, e primi 150 passi, sotto), confrontate con l'approccio diretto.}
+    \label{fig:sim20+150}
 \end{figure}
+
+\pagebreak
 
 \section{Applicazione a dati reali}
 
-Il Minor Planet Center raccoglie dati su osservazioni ottiche astrometriche di corpi minori, comete e satelliti naturali, effettuate da osservatori in tutto il mondo. I dati sono forniti senza alcun tipo di correzione, come specificato nelle linee guida (\url{https://minorplanetcenter.net/iau/info/Astrometry.html#corrs}).
+Il Minor Planet Center raccoglie dati su osservazioni ottiche astrometriche di corpi minori, comete e satelliti naturali, effettuate da osservatòri in tutto il mondo. I dati sono forniti senza alcun tipo di correzione, come specificato nelle linee guida (\url{https://minorplanetcenter.net/iau/info/Astrometry.html#corrs}).
 
 Moduli Python esistenti come \lstinline{astroquery} consentono di richiedere automaticamente le osservazioni; tuttavia si possono scaricare archivi più completi direttamente dalla piattaforma web \url{https://www.minorplanetcenter.net/db_search}.
 
@@ -867,10 +896,12 @@ Questi archivi sono file di testo in classico stile Fortran a 80 colonne e seguo
 \item la banda utilizzata, ossia un'indicazione della fascia di frequenze elettromagnetiche considerate
 \item il codice dell'osservatorio
 \end{itemize}
-Il file \lstinline{parse.py} si occupa dell'interpretazione dei dati e della trasformazione in oggetti \lstinline{MinorPlanetObservation}. Questo passaggio richiede la conversione degli angoli in radianti e della magnitudine osservata in magnitudine visuale. In effetti, i modelli fotometrici si basano sulla magnitudine relativa alla luce visibile, per cui può essere necessario utilizzare la tabella di conversione fornita alla pagina \url{https://www.minorplanetcenter.net/iau/info/BandConversion.txt}. \\
-Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore. Anche in questo caso, un servizio di effemeridi può essere utilizzato per risalire alla posizione baricentrica dell'osservatore in un determinato istante date le coordinate geodetiche. \pagebreak
+Il file \lstinline{parse.py} si occupa dell'interpretazione dei dati e della trasformazione in oggetti della classe di utility \lstinline{MinorPlanetObservation}. Questo passaggio richiede la conversione degli angoli in radianti e della magnitudine osservata in magnitudine visuale. In effetti, i modelli fotometrici si basano sulla magnitudine relativa alla luce visibile, per cui può essere necessario utilizzare la tabella di conversione fornita alla pagina \url{https://www.minorplanetcenter.net/iau/info/BandConversion.txt}. \\
+Infine, il codice dell'osservatorio viene confrontato con la lista alla pagina \url{https://www.minorplanetcenter.net/iau/lists/ObsCodes.html}, per risalire alle coordinate geodetiche dell'osservatore. Anche in questo caso, un servizio di effemeridi può essere utilizzato per risalire alla posizione baricentrica dell'osservatore in un determinato istante date le coordinate geodetiche.
 
-Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$. In figura~\ref{fig:Bennu130} si riportano i risultati sulle prime 130 osservazioni dell'asteroide Bennu (1999 RQ36). Anche in questo caso si osserva una generale convergenza, seppur decisamente più lenta rispetto alla simulazione. Inoltre, si è osservato che il processo non risulta perfettamente stabile; su altre porzioni di dati, lievi discostamenti improvvisi portano a rapida divergenza. Tutto ciò potrebbe essere dovuto a diversi motivi, possibilmente legati a problemi di stabilità numerica, per cui studi ulteriori sono necessari. In ogni caso, si è mostrato come il filtro permetta di ottenere risultati dalle 10 alle 100 volte più accurati rispetto all'approccio diretto, nonostante le diverse semplificazioni che sono state fatte, dando prova concreta dell'utilità del filtro di Kalman in questo contesto reale.
+\lstinputlisting[basicstyle=\scriptsize\ttfamily,firstline=14,lastline=21]{listings/parse.py}
+
+Raccolte le osservazioni, si trasformano gli oggetti \lstinline{MinorPlanetObservation} in vettori di misurazione e si procede, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3},\beta=2,\kappa=0$. In figura~\ref{fig:Bennu130} si riportano i risultati sulle prime 130 osservazioni dell'asteroide Bennu (1999 RQ36). Anche in questo caso si osserva una generale convergenza, seppur decisamente più lenta rispetto alla simulazione. Inoltre, si è osservato che il processo non risulta perfettamente stabile; su altre porzioni di dati, lievi discostamenti improvvisi portano a rapida divergenza. Tutto ciò potrebbe essere dovuto a diversi motivi, possibilmente legati a problemi di stabilità numerica, per cui studi ulteriori sono necessari. In ogni caso, si è mostrato come il filtro permetta di ottenere risultati dalle 10 alle 100 volte più accurati rispetto all'approccio diretto, nonostante le diverse semplificazioni che sono state fatte, dando prova concreta dell'utilità del filtro di Kalman in questo contesto reale.
 
 \begin{figure}
     \includegraphics[width=0.55\linewidth]{figures/Bennu_130_3d.png}
@@ -880,13 +911,29 @@ Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3
     \vspace{2\baselineskip}
 \end{figure}
 
+Nel complesso, il processo è stato sperimentato su 4 dataset, relativi a 4 asteroidi classificati come Potentially Hazardous Asteroids (PHA) dal Minor Planet Center, seppure il rischio di effettiva collisione con la Terra sia stimato attualmente come estremamente ridotto. L'elenco completo dei PHA riconosciuti dal MPC è disponibile alla pagina \url{https://www.minorplanetcenter.net/iau/Dangerous.html}.
+\begin{itemize}
+\item Bennu: un asteroide con orbita di tipo Apollo (semiasse maggiore $a>1\text{ AU}$) e un diametro medio di circa 490 metri. Oggi si hanno molte informazioni sulle caratteristiche fisiche e sull'orbita dell'asteroide, principalmente grazie alla missione OSIRIS-REx della NASA, che lo ha sorvolato e studiato con grande precisione. Questi dati includono rilevamenti topografici tramite lidar e fotografie ad alta risoluzione, utili per creare modelli 3D dettagliati della forma e della superficie. Sono disponibili informazioni su caratteristiche geologiche, composizione superficiale, velocità di rotazione, e dati termici. Per questo studio sono state considerate solo le osservazioni terrestri, a partire dalla scoperta nel 1999, che potranno essere poi confrontate con le misurazioni più precise per ottenere modelli completi. Ad oggi si prevede una serie di 157 possibili impatti tra l'anno 2178 e il 2290, con una probabilità cumulativa intorno allo $0.05\%$ e un valore cumulativo di $-1.40$ sulla scala Palermo.
+
+\item Mjolnir: un piccolo asteroide con orbita di tipo Apollo che incrocia quella terrestre e classificato come potenzialmente pericoloso (PHA) dalla NASA, seppure non siano attualmente previsti possibili impatti. Mjolnir ha dimensioni stimate fra 82 e 366 metri, con un periodo di rotazione di 11.6 ore. Il dataset di Mjolnir comprende dati orbitali e fisici raccolti da osservazioni radar e ottiche terrestri. Le stime precise dell'orbita permettono di monitorare la sua traiettoria e di prevedere eventuali prossimità alla Terra. Mjolnir è studiato anche per la sua rotazione e per caratteristiche fisiche come la riflettività superficiale e la struttura. Tali dati sono utilizzati in modelli di monitoraggio di eventualmente comportamenti dinamici complessi dovuti a perturbazioni gravitazionali o effetti Yarkovsky (forza causata dall'irraggiamento termico). Questo dataset è meno ricco di immagini ad alta risoluzione rispetto a Bennu, ma essenziale per la sorveglianza e valutazione del rischio.
+
+\item 1950 DA: un asteroide di circa 1.1--1.3 km di diametro appartenente al gruppo Apollo e collocato in cima alle liste dei PHA. Si stima, infatti, un possibile impatto nell'anno 2880, con una probabilità intorno allo $0.04\%$ e un valore di $-0.92$ sulla scala Palermo, superiore a quello di Bennu per via delle dimensioni maggiori. Il dataset di 1950 DA include misure ottenute da radar planetari e telescopi che ne permettono la ricostruzione orbitale dettagliata e la caratterizzazione fisica. Significativo è il fatto che 1950 DA ruoti molto velocemente, indicando una possibile coesione interna elevata o struttura particolare. Viene osservato sia per i possibili impatti futuri con la Terra, che per analisi che considerano gli effetti gravitazionali e della radiazione solare sul suo moto. I dati comprendono parametri orbitali, estimazioni di densità e massa, e modelli di forma approssimati, usati in simulazioni su lunga scala temporale.
+
+\item Castalia: un asteroide di circa 1.4 km appartenente al gruppo Apollo, primo a essere modellato tramite immagini radar. Ha una forma a ``nocciola'' o binaria a contatto, formata da due componenti unite dalla gravità mutua. Questa forma inusuale rende più difficile utilizzare i modelli tradizionali per rappresentare la relazione tra l'angolo di fase e la magnitudine. Si tratta di un asteroide potenzialmente pericoloso con orbita ben caratterizzata e osservato ampiamente tramite radar e fotometria. Il dataset include modelli tridimensionali basati su dati radar, informazioni sulla composizione, e proprietà dinamiche della coppia di corpi connessi gravitazionalmente (binario a contatto). Questi dati aiutano a capire la formazione e l'evoluzione degli asteroidi binari, la loro rotazione sincronizzata e l'interazione gravitazionale interna. Inoltre, sono disponibili dati osservativi dettagliati che supportano simulazioni numeriche e studi di sorveglianza orbitale per la valutazione del rischio associato.
+\end{itemize}
+
 \begin{figure}
     \includegraphics[width=0.55\linewidth]{figures/Mjolnir_60_3d.png}
     \includegraphics[width=0.45\linewidth]{figures/Mjolnir_60_error.png}
+    \caption{Visualizzazione delle stime sui dati reali dell'asteroide Mjolnir (prime 60 osservazioni), confrontate con l'approccio diretto.}
+    \label{fig:Mjolnir60}
+\end{figure}
+
+\begin{figure}
     \includegraphics[width=0.55\linewidth]{figures/1950_DA_70_3d.png}
     \includegraphics[width=0.45\linewidth]{figures/1950_DA_70_error.png}
-    \caption{Visualizzazione delle stime sui dati reali degli asteroidi Mjolnir (sopra, prime 60 osservazioni) e 1950 DA (sotto, prime 70 osservazioni), confrontate con l'approccio diretto.}
-    \label{fig:Mjolnir60+1950DA70}
+    \caption{Visualizzazione delle stime sui dati reali dell'asteroide 1950 DA (prime 70 osservazioni), confrontate con l'approccio diretto.}
+    \label{fig:1950DA70}
 \end{figure}
 
 \begin{figure}
@@ -895,6 +942,10 @@ Si procede, poi, come per i dati simulati, con un'istanza UKF con $\alpha=10^{-3
     \caption{Visualizzazione delle stime sui dati reali dell'asteroide Castalia (prime 50 osservazioni), confrontate con l'approccio diretto. Si osservano cenni di divergenza.}
     \label{fig:Castalia50}
 \end{figure}
+
+\pagebreak
+
+Per meglio interpretare i risultati ottenuti, si effettua un'analisi statistica sugli errori. Si tenta di caratterizzare la distribuzione degli errori attraverso un riepilogo a cinque numeri, ossia l'insieme del valore minimo, del primo quartile (25\% degli errori saranno minori di esso), della mediana (50\%), del terzo quartile (75\%) e del valore massimo. Nella tabella~\ref{tab:results} si riporta l'analisi sui test effettuati, espressi in unità astronomiche. Si tratta di una rappresentazione limitata, in quanto non si evince il miglioramento delle stime nel tempo, ma permette di osservare concretamente l'efficacia del filtraggio.
 
 \begin{table}
 \begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lccccc@{}}
@@ -909,6 +960,7 @@ Castalia (diretto) & 3.89e-3 & 3.18e-2 & 7.81e-2 & 1.30e-1 & 4.06e-1 \\
 Castalia (UKF)     & 3.44e-3 & 2.04e-2 & 3.30e-2 & 6.87e-2 & 2.75e-1 \\\midrule
 \end{tabular*}
 \caption{Caratterizzazione degli errori sulle posizioni attraverso un riepilogo a cinque numeri.}
+\label{tab:results}
 \end{table}
 
 \chapterWithoutNumber{Conclusioni}
