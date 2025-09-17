@@ -9,7 +9,7 @@ def real_position(t: float, a: float, e: float, i: float, om: float, w: float,
 
 def observe(tgt_pos: np.ndarray, obs_pos: np.ndarray, sun_pos: np.ndarray,
             hh: float, gg: float, dir_var: float, vv_var: float,
-            rng: np.random.Generator) -> np.ndarray:
+            rng: np.random.Generator) -> tuple[float, float, float]:
     tgt_obs_pos = tgt_pos - obs_pos
     tgt_obs_dist = norm(tgt_obs_pos)
     tgt_obs_ray = tgt_obs_pos / tgt_obs_dist
@@ -20,7 +20,7 @@ def observe(tgt_pos: np.ndarray, obs_pos: np.ndarray, sun_pos: np.ndarray,
     phi = phase_from_distances(tgt_sun_dist, tgt_obs_dist, obs_sun_dist)
     vv = visual_magnitude_from_absolute(hh, tgt_sun_dist, tgt_obs_dist, phi, gg)
     vv = rng.normal(loc=vv, scale=np.sqrt(vv_var))
-    return np.array([ra, dec, vv])
+    return ra, dec, vv
 
 
 def main() -> None:
